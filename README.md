@@ -1,15 +1,45 @@
 # IDQL-specs
-This is the repository for development of IDQL Policy Language. IDQL's objective is to standardize access policy across the cloud and the stack usable in standalone deployments all the way to hybrid multi-cloud scenarios.
+This is the repository for development of IDQL Policy Language. 
 
-## Why Is IDQL Needed?
-Why does the world need another standard?
+## Introduction
+
+IDQL's objective is to standardize access policy across the cloud and the stack usable in standalone deployments all the way to hybrid multi-cloud scenarios.
+
+### Why Is IDQL Needed?
+IDQL's goal is to produce a unified policy system because:
 * Multi-cloud access policy does not exist.
 * Incumbent vendors are not motivated to address multi-cloud challenges.
 * Distributed architectures require policy consistency across disparate platforms, domains and technologies.
 * Without a standard there will be inconsistency, risk through silos, greater cost and lock-in.
 
-How does IDQL compare to other standards?
-* OPA (Open Policy Agent (CNCF) – Focused on K8S cluster management, networking, and microservices - not end user identity.
-* SPIFFE/Spire (CNCF) – focused on App to App identity using x509, not end user identity.
-* SAML, OIDC, OAuth are all protocols for SSO and Authorization but not end user identity policy.
-* XACML (OASIS) – focused on fine grained entitlements not end user identity policy. Not declarative, requires custom code and is too complex.
+![](./collateral/images/IDQL-3d.png "IDQL 3D")
+
+### How does IDQL compare to other standards?
+* CNCF [Open Policy Agent](https://www.openpolicyagent.org) (OPA) – Focused on K8S cluster management, networking, and 
+  microservices - not end user identity.
+* CNCF [SPIFFE/Spire](https://spiffe.io) – focused on App to App identity using x509, not end user identity.
+* [SAML](https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=security), [OIDC](https://openid.net),[ OAuth](https://tools.ietf.org/wg/oauth/) are all protocols for SSO and Authorization but not end user identity policy.
+* [XACML](https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=xacml) (OASIS) – focused on fine-grained 
+  entitlements not end user identity policy. Not declarative, requires custom code and is too complex.
+
+### What are the basics?
+
+IDQL Policy is a series of meta statements that define simple policy rules that are then translated and deployed to 
+the correct cloud providers, layers and components. A basic statement consists of a `Subject` + `Action` + target 
+`Object` + `condition`.
+
+![](./collateral/images/IDQL-statement.png "IDQL Statement")
+
+IDQL policy is defined in either JSON or YAML human-readable files. IDQL is intended to support both lowest common 
+denominator User App Policies (? source) and extended features such as contextual access. IDQL policy is then 
+translated into proprietary policy and published into existing IAM systems through APIs and gateways. 
+
+## The Standard Process
+
+We are working with developers and customers to build a set of specifications and open source as part of the Cloud 
+Native Computing Foundation. The IDQL Working Group will be responsible for the policy specification and API 
+definitions published on this site. 
+
+## How to Contribute
+
+TBD.
