@@ -3,7 +3,10 @@ This is the repository for development of IDQL Policy Language.
 
 ## Introduction
 
-IDQL's objective is to standardize access policy across the cloud and the stack usable in standalone deployments all the way to hybrid multi-cloud scenarios.
+IDQL's objective is to standardize access policy and associated APIs across the cloud and the stack usable in 
+standalone deployments all the way to hybrid multi-cloud scenarios.
+
+IDQL specifications can be found [here](specs/Specifications.md).
 
 ### Why Is IDQL Needed?
 IDQL's goal is to produce a unified policy system because:
@@ -16,7 +19,8 @@ IDQL's goal is to produce a unified policy system because:
 
 ### How does IDQL compare to other standards?
 * CNCF [Open Policy Agent](https://www.openpolicyagent.org) (OPA) – Focused on K8S cluster management, networking, and 
-  microservices - not end user identity.
+  microservices. It is expected that IDQL will be supported in OPA by using a set of (tentatively
+  planned OPA Rego modules that will be able to interpret IDQL policy directly in OPA Agents.
 * CNCF [SPIFFE/Spire](https://spiffe.io) – focused on App to App identity using x509, not end user identity.
 * [SAML](https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=security), [OIDC](https://openid.net),[ OAuth](https://tools.ietf.org/wg/oauth/) are all protocols for SSO and Authorization but not end user identity policy.
 * [XACML](https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=xacml) (OASIS) – focused on fine-grained 
