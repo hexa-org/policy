@@ -1,2 +1,2 @@
 # IDQL-specs
-Repository for development if IDQL Policy Language
+Repository for development of IDQL Policy Language
