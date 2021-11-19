@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "vers": "0.1",
+    "date": "2021-08-01T21:32:44.882Z",
+    "disp": "Access policy enabling profile update",
+    "app": "CanaryBank1",
+    "layer": "User"
+  },
+  "id": "CanaryProfileUpdate",
+  "subjects": [
+    {
+      "subType": "idp",
+      "authId": "myGoogleIDP"
+    },
+    {
+      "subType": "net",
+      "cidr": "192.168.1.0/24"
+    }
+  ],
+  "actions": [
+    {
+      "name": "createProfile",
+      "actionUri": "https:POST:/Users/"
+    },
+    {
+      "name": "editProfile",
+      "actionUri": "https:PUT|PATCH:/Users/*",
+      "condition": "selfCheck"
+    }
+  ],
+
+  "objects": [
+    {
+      "assetId": "CanaryProfileService",
+      "pathSpec": "/Profile/*"
+    }
+  ]
+}
