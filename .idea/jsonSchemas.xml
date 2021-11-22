@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JsonSchemaMappingsProjectConfiguration">
+    <state>
+      <map>
+        <entry key="idql-condition.schema">
+          <value>
+            <SchemaInfo>
+              <option name="name" value="idql-condition.schema" />
+              <option name="relativePathToSchema" value="schema/idql-condition.schema.json" />
+              <option name="schemaVersion" value="JSON Schema version 7" />
+            </SchemaInfo>
+          </value>
+        </entry>
+        <entry key="idql.schema">
+          <value>
+            <SchemaInfo>
+              <option name="name" value="idql.schema" />
+              <option name="relativePathToSchema" value="schema/idql.schema.json" />
+              <option name="schemaVersion" value="JSON Schema version 7" />
+              <option name="patterns">
+                <list>
+                  <Item>
+                    <option name="path" value="schema/idql-example.json" />
+                  </Item>
+                </list>
+              </option>
+            </SchemaInfo>
+          </value>
+        </entry>
+      </map>
+    </state>
+  </component>
+</project>

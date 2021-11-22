@@ -25,7 +25,9 @@
     {
       "name": "editProfile",
       "actionUri": "https:PUT|PATCH:/Users/*",
-      "condition": "selfCheck"
+      "condition": {
+        "rule": "adminType eq admincontractor"
+      }
     }
   ],
 
@@ -33,6 +35,17 @@
     {
       "assetId": "CanaryProfileService",
       "pathSpec": "/Profile/*"
+    }
+  ],
+
+  "scopes": [
+    {
+      "name": "adminType",
+      "value": "admin-contractor",
+      "condition": {
+        "rule": "User:employeeType eq contract",
+        "action": "allow"
+      }
     }
   ]
 }

@@ -7,7 +7,7 @@
   "required": ["id","subjects","actions","objects"],
   "properties": {
     "id": {
-      "type": "string",
+      "type": "uri",
       "description": "A unique identifier for the policy"
     },
     "meta": {
@@ -25,6 +25,10 @@
         "vers": {
           "type": "string",
           "description": "A version identifier to distinguish different policy versions"
+        },
+        "etag": {
+          "type": "string",
+          "description": "A hash of the current policy per Section 2.3 of [RFC7232]."
         },
         "disp": {
           "type": "string",
@@ -58,7 +62,7 @@
               "then": {
                 "properties": {
                   "authId" : {
-                    "type": "string",
+                    "type": "uri",
                     "description": "The identifier of a provider that does HTTP Basic Authentication"
                   }
                 }
@@ -74,7 +78,7 @@
               "then": {
                 "properties": {
                   "authId" : {
-                    "type": "string",
+                    "type": "uri",
                     "description": "The identifier of a provider that does JWT validation"
                   }
                 }
@@ -90,7 +94,7 @@
               "then": {
                 "properties": {
                   "authId" : {
-                    "type": "string",
+                    "type": "uri",
                     "description": "The identifier of an OIDC Provider"
                   }
                 }
@@ -106,7 +110,7 @@
               "then": {
                 "properties": {
                   "ref" : {
-                    "type": "string",
+                    "type": "uri",
                     "description": "The URI of a subject",
                     "format": "uri-reference"
                   }
@@ -145,7 +149,7 @@
                 "properties": {
                   "authId" : {
                     "type": "string",
-                    "description": "The identifier of an OIDC Provider"
+                    "description": "The identifier of a provider"
                   }
                 }
               }
@@ -168,6 +172,10 @@
             "type": "string",
             "format": "uri"
           },
+          "exclude": {
+            "type": "boolean",
+            "description": "When exclude is true, the action is not permitted (implying all other actions permitted)"
+          },
           "condition": {
             "description": "A condition that may be applied to limit matches for a particular action",
             "$ref": "https://github.com/independentid/IDQL-specs/schema/idql-condition.schema.json"
@@ -184,7 +192,7 @@
       "items": {
         "properties": {
           "assetId": {
-            "type": "string",
+            "type": "uri",
             "description": "The identifier of an asset that is protected by policy"
           },
           "pathSpec": {
@@ -202,6 +210,32 @@
             "$ref": "https://github.com/independentid/IDQL-specs/schema/idql-condition.schema.json"
           },
           "required": ["assetId"]
+        }
+      }
+    },
+
+    "scopes" : {
+      "$comment" : "Scope allows one or more variables (tags) to be defined based on a condition.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "A tag key name which may be referenced",
+            "format": "uri"
+          },
+          "value": {
+            "type": "string",
+            "description": "A static or dynamic value. Variables may be inserted using ${attr} notation",
+            "$comment": "Example: canaryAdmin-${User:userType} may resolve as 'canaryAdmin-employee'"
+          },
+          "condition": {
+            "description": "A condition that may be applied to the tag assignment",
+            "$ref": "https://github.com/independentid/IDQL-specs/schema/idql-condition.schema.json",
+            "$comment": "Example: User:roles eq admin"
+          },
+          "required": ["name","value"]
         }
       }
     }

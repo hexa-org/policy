@@ -8,7 +8,12 @@
     "$comment": "This definition is just a placeholder for a condition TO BE DEFINED",
     "rule": {
       "type": "string",
-      "description": "A filter defining a matching condition"
+      "description": "A filter defining a matching condition based on RFC7644 Sec 3.4.2.2"
+    },
+    "action": {
+      "enum": ["allow","deny","audit","disabled"],
+      "description": "The outcome desired if condition is a match (default='allow')"
     }
+
   }
 }
