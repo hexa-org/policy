@@ -1,4 +1,5 @@
-# IDQL-specs
+# IDQL Specifications Project
+
 This is the repository for development of IDQL Policy Language. 
 
 ## Introduction
@@ -8,7 +9,7 @@ standalone deployments all the way to hybrid multi-cloud scenarios.
 
 IDQL specifications can be found [here](specs/Specifications.md).
 
-### Why Is IDQL Needed?
+## Why Is IDQL Needed?
 IDQL's goal is to produce a unified policy system because:
 * Multi-cloud access policy does not exist.
 * Incumbent vendors are not motivated to address multi-cloud challenges.
@@ -17,7 +18,21 @@ IDQL's goal is to produce a unified policy system because:
 
 ![](./collateral/images/IDQL-3d.png "IDQL 3D")
 
-### How does IDQL compare to other standards?
+## Use Cases for IDQL
+IDQL is intended to enable management of the following policy scenarios where policy may control:
+* Which administrators may make changes in the environment;
+* What service features, configurations, and even SKUs may be deployed;
+* Used to define what applications may be deployed (for example, an admission controller in a
+  Kubernetes cluster controls what application tags may be deployed in a cluster);
+* Mandate network requirements for an application including restrictions for a
+  software defined network (SDNET);
+* Configure the authentication requirements for an Identity Provider;
+* Operation of a platform service such as an Identity Aware Proxy;
+* External access to application endpoints;
+* Internal access between micro-services;
+* Scoping of information available to an application; and,
+* Inform applications what rights a subject has in order to optimize the user interface experience.
+## How does IDQL compare to other standards?
 * CNCF [Open Policy Agent](https://www.openpolicyagent.org) (OPA) – Focused on K8S cluster management, networking, and 
   microservices. It is expected that IDQL will be supported in OPA by using a set of (tentatively
   planned OPA Rego modules that will be able to interpret IDQL policy directly in OPA Agents.
@@ -26,7 +41,7 @@ IDQL's goal is to produce a unified policy system because:
 * [XACML](https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=xacml) (OASIS) – focused on fine-grained 
   entitlements not end user identity policy. Not declarative, requires custom code and is too complex.
 
-### What are the basics?
+## Getting Started
 
 IDQL Policy is a series of meta statements that define simple policy rules that are then translated and deployed to 
 the correct cloud providers, layers and components. A basic statement consists of a `Subject` + `Action` + target 

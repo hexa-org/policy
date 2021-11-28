@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/independentid/IDQL-specs/schema/idql.schema.json",
+  "$id": "https://github.com/independentid/IDQL-specs/schema/idql-policy.schema.json",
   "title": "IDQL Policy",
   "description": "Schema for IDQL Policy statements",
   "type": "object",
@@ -16,7 +16,7 @@
         "date": {
           "type": "string",
           "format": "date-time",
-          "description": "Optional DateTime per Section 7 of RFC7159"
+          "description": "Optional modification date in DateTime format (e.g., 2008-01-23T04:56:22Z)"
         },
         "app": {
           "type": "string",
@@ -49,7 +49,7 @@
             "$ref": "https://github.com/independentid/IDQL-specs/schema/idql-condition.schema.json"
           },
           "subType": {
-            "enum": ["any","basic","jwt","idp","ref","net","other"],
+            "enum": ["any","auth","basic","jwt","op","saml","ref","net","other"],
             "description": "The subject type which is one of any|basic|jwt|idp|ref|net|other"
           },
           "allOf": [
@@ -86,9 +86,9 @@
             },
 
             {
-              "$comment": "This validates a authorization based on OIDC or SAML IDP provider",
+              "$comment": "This validates a authorization based on OIDC provider",
               "if": {
-                "properties": { "subType":  {"const":  "idp"}},
+                "properties": { "subType":  {"const":  "op"}},
                 "required": ["subType"]
               },
               "then": {
@@ -96,6 +96,22 @@
                   "authId" : {
                     "type": "uri",
                     "description": "The identifier of an OIDC Provider"
+                  }
+                }
+              }
+            },
+
+            {
+              "$comment": "This validates a authorization based a SAML IDP provider",
+              "if": {
+                "properties": { "subType":  {"const":  "saml"}},
+                "required": ["subType"]
+              },
+              "then": {
+                "properties": {
+                  "authId" : {
+                    "type": "uri",
+                    "description": "The identifier of a SAML Provider"
                   }
                 }
               }
@@ -156,8 +172,7 @@
             }
           ]
         }
-      },
-      "minItems": 1
+      }
     },
 
     "actions": {
@@ -232,7 +247,8 @@
           },
           "condition": {
             "description": "A condition that may be applied to the tag assignment",
-            "$ref": "https://github.com/independentid/IDQL-specs/schema/idql-condition.schema.json",
+            "$ref": "https://github.com/independentid/-specs/schema/idql-condition.schema.json",
+
             "$comment": "Example: User:roles eq admin"
           },
           "required": ["name","value"]

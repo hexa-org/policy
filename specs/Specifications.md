@@ -16,3 +16,9 @@ policy as desired.
 All IDQL specifications follow a common set of conventions and formats. For more information see the [Conventions](Conventions.md) 
 document.
 
+Specifications:
+* [Core IDQL specification](IDQL-core-specification.md)
+* Sources and Assets
+  * Identity Provider specification
+  * Objects Specifications
+

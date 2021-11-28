@@ -12,16 +12,15 @@
             </SchemaInfo>
           </value>
         </entry>
-        <entry key="idql.schema">
+        <entry key="idql-policy">
           <value>
             <SchemaInfo>
-              <option name="name" value="idql.schema" />
-              <option name="relativePathToSchema" value="schema/idql.schema.json" />
-              <option name="schemaVersion" value="JSON Schema version 7" />
+              <option name="name" value="idql-policy" />
+              <option name="relativePathToSchema" value="schema/idql-policy.schema.json" />
               <option name="patterns">
                 <list>
                   <Item>
-                    <option name="path" value="schema/idql-example.json" />
+                    <option name="path" value="examples/idql-example.json" />
                   </Item>
                 </list>
               </option>

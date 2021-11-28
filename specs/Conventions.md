@@ -23,8 +23,12 @@ Implementers MUST percent-encode URLs as described in Section 2.1 of
 
 Throughout these documents, figures may contain spaces and extra line
 wrapping to improve readability and accommodate space limitations.
-Similarly, some URIs contained within examples have been shortened
-for space and readability reasons (as indicated by "...").
+Similarly, some URIs contained within examples have been shortened, along with irrelevant content
+for space and readability reasons and is indicated by ". . ." in figures.
+
+Where attributes or parameters are discussed, angle-brackets are used to denote substitution. 
+For example `subjects.http.header.<name>` 
+means name can be replaced with the name of an HTTP Header. For example `subjects.http.header.authorization`.
 
 ## Schema
 
@@ -38,11 +42,25 @@ IDQL related APIs will be described using the [OpenAPI 3 Specification](https://
 
 ## Terminology
 
-* `Subject` - A security entity that initiates a request to perform an `action`.
-* `Action` - An action that a `Subject` may perform. Actions are defined by the target `object` depending on its 
+_[TODO: alphabetize this list when done]_
+
+* _Subject_ - A security entity that initiates a request to perform an `action`.
+* _Action_ - An action that a `Subject` may perform. Actions are defined by the target `object` depending on its 
 capabilities.
-* `Object` - A target entity where policy can be applied. An `object` typically has one or more `action` associated 
+* _Object_ - A target entity where policy can be applied. An `object` typically has one or more `action` associated 
 with it.
-* `Scope` - A special condition that results in a non-binary result for a policy. For example a use case "Alice is 
+* _Scope_ - A special condition that results in a non-binary result for a policy. For example a use case "Alice is 
 permitted administrator access to US Data" would require a `scope` of "US Data".
-* `Condition` - A condition may be applied in order to match an IDQL rule to a `Subject`, `Action`, or `Object`.
+* _Condition_ - A condition may be applied in order to match an IDQL rule to a `Subject`, `Action`, or `Object`.
+* _Asset_ - An asset is simply any componenet that is identifiable in a cloud native infrastructure. It may be an 
+  Identity Provider or it may be the target where a policy may be deployed or intended to impact.
+* _Policy Gateway_ - Is an IDQL service endpoint that is intended to map and deploy IDQL policy with a target Asset.
+* _Policy Decision Point_ - Is a shared service where a requestor may ask for a policy decision given a supplied 
+  request information.
+* _Policy Enforcement Point_ - Describes the location where the result of a policy decision is acted upon. For example 
+  an identity enable proxy may reject an HTTP request or pass the request on to an intended endpoint.
+* _Claim_ - A claim is an Attribute about a user or other security subject. The term "claim" is used to suggest that 
+  the attribute may not be verified and its authenticity or accuracy may be in question. For the purpose of policy 
+  syntax, a claim is an attribute.
+* _Attribute_ - An attribute is a variable that may be available for a policy rule to reference. Attributes may 
+  contain configuration information, request information, or claims provided by an Identity Provider.
