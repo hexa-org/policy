@@ -3,15 +3,6 @@
   <component name="JsonSchemaMappingsProjectConfiguration">
     <state>
       <map>
-        <entry key="idql-condition.schema">
-          <value>
-            <SchemaInfo>
-              <option name="name" value="idql-condition.schema" />
-              <option name="relativePathToSchema" value="schema/idql-condition.schema.json" />
-              <option name="schemaVersion" value="JSON Schema version 7" />
-            </SchemaInfo>
-          </value>
-        </entry>
         <entry key="idql-policy">
           <value>
             <SchemaInfo>

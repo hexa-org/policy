@@ -1,50 +1,83 @@
 {
-  "meta": {
-    "vers": "0.1",
-    "date": "2021-08-01T21:32:44.882Z",
-    "disp": "Access policy enabling profile update",
-    "app": "CanaryBank1",
-    "layer": "User"
-  },
-  "id": "CanaryProfileUpdate",
-  "subjects": [
+  "idql-policies": [
     {
-      "subType": "idp",
-      "authId": "myGoogleIDP"
-    },
-    {
-      "subType": "net",
-      "cidr": "192.168.1.0/24"
-    }
-  ],
-  "actions": [
-    {
-      "name": "createProfile",
-      "actionUri": "https:POST:/Users/"
-    },
-    {
-      "name": "editProfile",
-      "actionUri": "https:PUT|PATCH:/Users/*",
-      "condition": {
-        "rule": "adminType eq admincontractor"
+      "id": "CanaryProfileGoogleUpdate",
+      "meta": {
+        "vers": "0.1",
+        "date": "2021-08-01 21:32:44 UTC",
+        "disp": "Access policy enabling profile update for Google users",
+        "app": "CanaryBank1",
+        "layer": "User"
+      },
+      "subject": {
+        "subType": "op",
+        "provId": "myGoogleIDP"
+      },
+      "actions": [
+        {
+          "name": "createProfile",
+          "actionUri": "https:POST:/Users/"
+        }
+      ],
+      "object": {
+        "assetId": "CanaryProfileService",
+        "pathSpec": "/Profile/*"
       }
-    }
-  ],
-
-  "objects": [
+    },
     {
-      "assetId": "CanaryProfileService",
-      "pathSpec": "/Profile/*"
-    }
-  ],
-
-  "scopes": [
-    {
-      "name": "adminType",
-      "value": "admin-contractor",
+      "id": "EditProfileGoogleUpdate AdminContractor",
+      "meta": {
+        "vers": "0.1",
+        "date": "2021-08-01 21:32:44 UTC",
+        "disp": "Access policy enabling profile update for Google users",
+        "app": "CanaryBank1",
+        "layer": "User"
+      },
+      "subject": {
+        "subType": "op",
+        "provId": "myGoogleIDP"
+      },
+      "actions": [
+        {
+          "name": "editProfile",
+          "actionUri": "https:PUT|PATCH:/Users/*"
+        }
+      ],
+      "object": {
+        "assetId": "CanaryProfileService",
+        "pathSpec": "/Profile/*"
+      },
       "condition": {
         "rule": "User:employeeType eq contract",
         "action": "allow"
+      }
+    },
+    {
+      "id": "CanaryProfileInternalNetUpdate",
+      "meta": {
+        "vers": "0.1",
+        "date": "2021-08-01 21:32:44 UTC",
+        "disp": "Access policy enabling profile update for internal network clients",
+        "app": "CanaryBank1",
+        "layer": "Services"
+      },
+      "subject": {
+        "subType": "net",
+        "cidr": "192.168.1.0/24"
+      },
+      "actions": [
+        {
+          "name": "createProfile",
+          "actionUri": "https:POST:/Users/"
+        },
+        {
+          "name": "editProfile",
+          "actionUri": "https:PUT|PATCH:/Users/*"
+        }
+      ],
+      "object": {
+        "assetId": "CanaryProfileService",
+        "pathSpec": "/Profile/*"
       }
     }
   ]

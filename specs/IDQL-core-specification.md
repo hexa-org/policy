@@ -18,21 +18,20 @@ This document is available for use under the APL 2.0 [Apache License](../LICENSE
 
 ## Table of Contents
 
-- [1.0 Introduction](#1.0 Introduction)
-- [2.0 YAML and JSON Schema and Media-Types](#2.0 YAML and JSON Schema and Media Types)
-- [3.0 Policy and the Project Environment](#3.0 Policy and the Project Environment)
-  * [3.1 Identity Providers Types](#3.1 Identity Providers Types)
-  * [3.2 Assets](#3.2 Assets)
-- [4.0 IDQL Policy Statement](#4.0 IDQL Policy Statement)
+* [1.0 Introduction](#1.0 Introduction)
+* [2.0 YAML and JSON Schema and Media-Types](#2.0 YAML and JSON Schema and Media Types)
+* [3.0 Policy and the Policy Gateway](#3.0 Policy and the Policy Gateway)
+  * [3.1 Identity Provider Attributes](#3.1 Identity Provider Attributes)
+* [4.0 IDQL Policy Statements](#4.0 IDQL Policy Statements)
   * [4.1 Id Attribute](#4.1 Id Attribute)
   * [4.2 Meta Information](#4.2 Meta Information)
-  * [4.3 Subjects](#4.3 Subjects)
+  * [4.3 Subject](#4.3 Subject)
   * [4.4 Actions](#4.4 Actions)
-  * [4.5 Objects](#4.5 Objects)
+  * [4.5 Object](#4.5 Object)
   * [4.6 Scopes](#4.6 Scopes)
-  * [4.7 Using Conditions](#4.7 Using Conditions)
-- [5.0 Evaluation Processing Rules](#5.0 Evaluation Processing Rules)
-- [6.0 Deployment Lifecycle](#6.0 Deployment Lifecycle)
+  * [4.7 Condition](#4.7 Condition)
+* [5.0 Evaluation Processing Rules](#5.0 Evaluation Processing Rules)
+* [6.0 Deployment Lifecycle](#6.0 Deployment Lifecycle)
 
 ---
 ## 1.0 Introduction
@@ -46,123 +45,27 @@ proprietary platforms that implement IDQL enabled gateways (see: open source pro
 
 ![](../collateral/images/IDQL-rule.png "IDQL-rule")
 
->Discussion:  Which parts of IDQL should allow multiples? Multiples enable a single rule to cover more cases.  E.g. 
-mulitiple subjects can allow different actors access via the same rule. Issue is that a condition may need to attach 
-to a specific source. If we make condition as a separate item, then more complex filters like `(aubject.authId eq 
-myGoogleIP and (User:role eq admin))`.  Which pattern is easier to map via the IDQL Gateway? 
-> 
-> In the current draft, subjects, actions, and objects are each multi-values with each value having a condition attachable.
+An IDQL policy rule identifies a `subject` provider that is permitted one or more `actions` against a target `object` 
+with an OPTIONAL set of `scopes` that MAY be used in a condition or returned to the target (e.g. dataSet = "US"). 
+IDQL policy MAY be expressed in YAML or JSON format.
 
-An IDQL rule defines one or more `subjects` that are permitted one or more `actions` against one or more `objects` with 
-an optional set of `scopes`. IDQL may be expressed in YAML or JSON format.
+IDQL is intended to be used with an [IDQL Policy Gateway API] (the "Gateway") which enables retrieval of deployment 
+environments and the ability to retireve, update, and provision policy. The Gateway defines identifiers for the assets referred to in 
+IDQL policy such as: 
+* `provId` - The identifier of an Identity Provider (e.g. "myGoogleIDP") that will provide the "subjects" referred to in 
+  the policy.
+* `assetId` - The identifier of a service or entity where policy is deployed (e.g. "CanaryProfileService").
 
-The following shows a policy that users from a provider known as `myGoogleIDP` or entities with an IP address 
+### Example IDQL Policy
+
+The following shows a policy that users from a provider known as "myGoogleIDP" or entities with an IP address 
 matching IP CIDR 192.168.0.1/24 may perform a `createProfile` or `editProfile` action against the target object 
-`CanaryProfileService`. The`editProfile` action also 
-requires that the value of the variable `adminType` must equal `admincontractor`. The variable `adminType` is set in 
-scopes as `admin-contractor` if the subject has an `employeeType` of `contract`.
+`CanaryProfileService`. When from "myGoogleIDP" The`editProfile` action also 
+requires that the User `employeeType` be equal to `contract`. 
+> Discussion: User:employeeType eq contract is essentially an implied role based on a condition of the user. This 
+> may be pre-assigned by the IDP, or be tested at the PDP. 
 
 The YAML representation of an example IDQL policy:
-```yaml
----
-idql-policies:
-- id: CanaryProfileUpdate 
-  meta:
-    vers: 0.1
-    date: 2021-08-01T21:32:44.882Z
-    disp: Access policy enabling profile update
-    app: CanaryBank1
-    layer: User
-  subjects:
-  - subType: idp
-    authId: myGoogleIDP
-  - subType: net
-    cidr: 192.168.1.0/24
-  actions:
-  - name: createProfile
-    actionUri: https:POST:/Users/
-  - name: editProfile
-    actionUri: https:PUT|PATCH:/Users/*
-    condition:
-      rule: adminType eq admincontractor
-  objects:
-  - assetId: CanaryProfileService
-    pathSpec: /Profile/*
-  scopes:
-  - name: adminType
-    value: admin-contractor
-    condition:
-      rule: User:employeeType eq contract
-      action: allow
-```
-
-The JSON representation of the YAML policy above:
-```json lines
-{
-  "idql-policies":[
-    {
-      "id": "CanaryProfileUpdate",
-      "meta": {
-        "vers": "0.1",
-        "date": "2021-08-01T21:32:44.882Z",
-        "disp": "Access policy enabling profile update",
-        "app": "CanaryBank1",
-        "layer": "User"
-      },
-      "subjects": [
-        {
-          "subType": "idp",
-          "authId": "myGoogleIDP"
-        },
-        {
-          "subType": "net",
-          "cidr": "192.168.1.0/24"
-        }
-      ],
-      "actions": [
-        {
-          "name": "createProfile",
-          "actionUri": "https:POST:/Users/"
-        },
-        {
-          "name": "editProfile",
-          "actionUri": "https:PUT|PATCH:/Users/*",
-          "condition": {
-            "rule": "adminType eq admincontractor"
-          }
-        }
-      ],
-      "objects": [
-        {
-          "assetId": "CanaryProfileService",
-          "pathSpec": "/Profile/*"
-        }
-      ],
-      "scopes": [
-        {
-          "name": "adminType",
-          "value": "admin-contractor",
-          "condition": {
-            "rule": "User:employeeType eq contract",
-            "action": "allow"
-          }
-        }
-      ]
-    }
-  ]
-}
-```
-
--------
-
-> DISCUSS: Below is an alternative which more closely matches the initial IDQL proposals (condition is top level and 
-subject etc. is singular). In this case, a single policy rule becomes 4 because there are two subject types and two 
-actions where one action has a condition. In the following example, actions is still plural but all actions must 
-> have the same conditions.
-> 
-> The trade-off is that in the form below, more rules are needed but the processing may be somewhat easier to 
-> process. It may also be easier in deployment to figure out which rules go with which assets and can then be sorted 
-> by Identity Provider within that asset context.
 ```yaml
 ---
 idql-policies:
@@ -174,14 +77,14 @@ idql-policies:
     app: CanaryBank1
     layer: User
   subject:
-    subType: idp
-    authId: myGoogleIDP
+    subType: op
+    provId: myGoogleIDP
   actions:
     - name: createProfile
       actionUri: https:POST:/Users/
   object:
-    - assetId: CanaryProfileService
-      pathSpec: /Profile/*
+    assetId: CanaryProfileService
+    pathSpec: /Profile/*
 - id: EditProfileGoogleUpdate AdminContractor
   meta:
     vers: 0.1
@@ -190,14 +93,14 @@ idql-policies:
     app: CanaryBank1
     layer: User
   subject:
-    subType: idp
-    authId: myGoogleIDP
+    subType: op
+    provId: myGoogleIDP
   actions:
     - name: editProfile
       actionUri: https:PUT|PATCH:/Users/*
   object:
-    - assetId: CanaryProfileService
-      pathSpec: /Profile/*
+    assetId: CanaryProfileService
+    pathSpec: /Profile/*
   condition:
     rule: User:employeeType eq contract
     action: allow
@@ -214,28 +117,99 @@ idql-policies:
   actions:
   - name: createProfile
     actionUri: https:POST:/Users/
+  - name: editProfile
+    actionUri: https:PUT|PATCH:/Users/*
   object:
-  - assetId: CanaryProfileService
-    pathSpec: /Profile/*
-- id: EditProfileInternalNetUpdate
-  meta:
-    vers: 0.1
-    date: 2021-08-01T21:32:44.882Z
-    disp: Access policy enabling profile update for internal network clients
-    app: CanaryBank1
-    layer: Services
-  subject:
-    subType: net
-    cidr: 192.168.1.0/24
-  actions:
-    - name: editProfile
-      actionUri: https:PUT|PATCH:/Users/*
-  object:
-    - assetId: CanaryProfileService
-      pathSpec: /Profile/*
-  condition:
-    rule: User:employeeType eq contract
-    action: allow        
+    assetId: CanaryProfileService
+    pathSpec: /Profile/*   
+```
+
+The JSON representation of the YAML policy above:
+```json lines
+{
+  "idql-policies": [
+    {
+      "id": "CanaryProfileGoogleUpdate",
+      "meta": {
+        "vers": "0.1",
+        "date": "2021-08-01 21:32:44 UTC",
+        "disp": "Access policy enabling profile update for Google users",
+        "app": "CanaryBank1",
+        "layer": "User"
+      },
+      "subject": {
+        "subType": "op",
+        "provId": "myGoogleIDP"
+      },
+      "actions": [
+        {
+          "name": "createProfile",
+          "actionUri": "https:POST:/Users/"
+        }
+      ],
+      "object": {
+        "assetId": "CanaryProfileService",
+        "pathSpec": "/Profile/*"
+      }
+    },
+    {
+      "id": "EditProfileGoogleUpdate AdminContractor",
+      "meta": {
+        "vers": "0.1",
+        "date": "2021-08-01 21:32:44 UTC",
+        "disp": "Access policy enabling profile update for Google users",
+        "app": "CanaryBank1",
+        "layer": "User"
+      },
+      "subject": {
+        "subType": "op",
+        "provId": "myGoogleIDP"
+      },
+      "actions": [
+        {
+          "name": "editProfile",
+          "actionUri": "https:PUT|PATCH:/Users/*"
+        }
+      ],
+      "object": {
+        "assetId": "CanaryProfileService",
+        "pathSpec": "/Profile/*"
+      },
+      "condition": {
+        "rule": "User:employeeType eq contract",
+        "action": "allow"
+      }
+    },
+    {
+      "id": "CanaryProfileInternalNetUpdate",
+      "meta": {
+        "vers": "0.1",
+        "date": "2021-08-01 21:32:44 UTC",
+        "disp": "Access policy enabling profile update for internal network clients",
+        "app": "CanaryBank1",
+        "layer": "Services"
+      },
+      "subject": {
+        "subType": "net",
+        "cidr": "192.168.1.0/24"
+      },
+      "actions": [
+        {
+          "name": "createProfile",
+          "actionUri": "https:POST:/Users/"
+        },
+        {
+          "name": "editProfile",
+          "actionUri": "https:PUT|PATCH:/Users/*"
+        }
+      ],
+      "object": {
+        "assetId": "CanaryProfileService",
+        "pathSpec": "/Profile/*"
+      }
+    }
+  ]
+}
 ```
 ----
 
@@ -253,46 +227,34 @@ though popular is not formally defined. `text` media type is intended for unstru
 and 4.2.5 of RFC6838.
 
 ---
-## 3.0 Policy and the Project Environment
+## 3.0 Policy and the Policy Gateway
 
 IDQL requires a project configuration information that provides the data upon which IDQL rules
-may operate. 
-* _Identity Providers_ defines the `subjects` that MAY be defined in IDQL including provider type (SAML, OIDC, 
-etc.), their source, and claims available for use in policy rules.
-* _Assets_ are platforms, components, and services where policy may be potentially assigned. Typically, an asset will 
+may operate. The Policy Gateway provides the following objects
+* _Identity Providers_ define `provId` identifiers which define the `subjects` that MAY be defined in IDQL including 
+  provider type (SAML, OIDC, etc.), their source, and claims available for use in policy rules. Each provider SHOULD 
+  have a set of claims which may be used in policy conditions. Where possible, claims from Identity Providers
+  should be mapped to claims defined by [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.
+  html#Claims). For extended User profile attributes, use 
+  [SCIM User schema under IANA](https://www.iana.org/assignments/scim/scim.xhtml).
+* _Assets_ identified by `assetId` are platforms, components, and services where policy may be potentially assigned. 
+  Typically, an asset will 
   have a set of permissible `actions` that allowed, denied, and/or scoped in a IDQL policy rule. 
  
-In cloud native environments, policy decision and enforcement may occur using different models. Policy deployment, 
-processing (deicisons) and enforcement may be local to the asset (e.g. using the 
+In practice, the Policy Gateway is responsible for mapping IDQL Policy to each platform and its native policy system.
+In different cloud native environments, policy decision and enforcement may occur using different models. Policy 
+deployment, processing (deicisons) and enforcement may be local to the asset (e.g. using the 
 [Open Poilicy Agent sidecar pattern](https://www.openpolicyagent.org/docs/latest/integration/#comparison)), 
 delivered through a shared service Policy Decision Point (PDP), or handled directly through a platform's administrative 
 interfaces, or other method. As a declarative policy system, it is assumed that the policy administrative gateway 
-services for IDQL will handle delivery and configuration with the defined policy assets. _[is this needed?]_
+services for IDQL will handle delivery and configuration with the defined policy assets.
 
-The following figure shows the relationship between asset properties and IDQL policy. In the box on the left, a 
-single JSON file can contain one or more policies. Each policy references Providers and Objects stored in `Assets` 
-on the right. The `Assets` data contains all the necessary information to allow a Policy Gateway to deploy and 
-configure IDQL policy with thin the designated target. In addition to providing provisioning details, the Assets 
-also provide details on the attributes or schema available to IDQL policy.
 
-![ER Diagram](../collateral/images/IDQL-policy-ER.png)
-
-### 3.1 Identity Providers Types
-
->TODO: Does type matter in IDQL? Should "anonymous" be distinct from Any? What is the default position of policy - 
-deny unless permitted?
-
-Providers are declared defined in a configuration system or file and are identified by an `authId` in IDQL which 
-SHOULD match a defined provider. Declaration for defined providers SHOULD provide the context which enables IDQL to 
-match subjects in its policies. In addition to having an `authId`, each provider source should have a standard or 
-configured set of claims which may be used in policy conditions. Where possible, claims from Identity Providers 
-should be mapped to the JSON based [SCIM User schema under IANA](https://www.iana.org/assignments/scim/scim.xhtml).
-
-#### Identity Provider Attributes
+### 3.1 Identity Provider Attributes
 
 In addition to Identity Provider claims or attributes, the following attributes MAY be used in relation to an 
 authenticated subject:
-* `subject.authId` - The identifier for the provider under which the subject was authenticated.
+* `subject.provId` - The identifier for the provider under which the subject was authenticated.
 * `subject.http` - To access HTTP request information.
   * `header.<header-name>` - May be used to compare the value of a particular http header. If multiple headers of 
     the same name exists, then the value is considered muli-valued. Any comparison that matches a single-value SHALL 
@@ -312,29 +274,23 @@ authenticated subject:
 * `subject.prov.<name>` - Provider specific attributes related to a subject may be accessed using the `subject.prov` 
   prefix combined with a `<name>` for the provider specific attribute or claim.
 
-Provider configuration data may be accessed using `provider.<authId>.<name>` where `<authId>` is the authId identifier 
+Provider configuration data may be accessed using `provider.<provId>.<name>` where `<provId>` is the provId identifier 
 of the configured provider and `<name>` is a configuration parameter name.
 
 See [IDQL Providers Specification](IDQL-providers.md) for information on subject provider configuration.
 
-### 3.2 Assets
-Each asset referred to in an IDQL policy uses an assetId identifier. The information on the location and other data 
-about that asset is contained within an asset inventory. This information includes the type of asset which further 
-defines how policy is mapped and deployed for the asset. For more information see: 
-[IDQL Assets Specification](IDQL-assets.md).
-
-> DISCUSS: It is assumed that the type of asset and its configuration determines the actions that are available. 
-> Does this matter to the IDQL specification?
-
 ----
-## 4.0 IDQL Policy Statement
+## 4.0 IDQL Policy Statements
 
-An IDQL policy statement consists of the following attributes:
+A set of IDQL Policy Statements is contained in an array of `idql-policies` which contains 1 or more IDQL "Policy 
+statements".
+
+Each Policy Statement consists of the following attributes:
 * `id` - An OPTIONAL unique attribute for the policy statement
 * `meta` - Metadata about the policy including versioning and descriptions
-* `subjects` - An array of subjects that this policy is applied to. 
-* `actions` - Actions that MAY be performed or excluded
-* `objects` - The assets against which policy is applied to.
+* `subject` - A subject identifying the actors a policy is applied to. 
+* `actions` - A set of actions that MAY be performed or excluded
+* `object` - The target assets against which policy is applied.
 * `scopes` - Defines attributes which may be used as additional qualifiers against subjects, actions, actions, or in 
   conditions applied to policy.
 
@@ -383,31 +339,27 @@ Informational attributes include:
 * `layer` - An OPTIONAL string identifier that may be used to group policy statements in a common container or 
   application layer.
 
-### 4.3 Subjects
+### 4.3 Subject
 
-`subjects` when provided, is an array of one or more Identity Provider sources as defined below. If 
-subjects is not present, the policy rule SHALL be applied to all requests, regardless of authentication status (e.g. HTTP authorization is ignored).
+The `subject` indicates a method or Identity Provider to identify a security entity invoking a request.
+If subject is not present, the policy rule is applied to all requests, regardless of authentication 
+status (e.g. HTTP authorization is ignored).
 ```yaml
 idql-policies:
 - id: example-policy
   meta:
     . . .
-  subjects:
-  - subType: idp
-    authId: myGoogleIDP
-  - subType: net
-    cidr: 192.168.1.0/24
+  subject:
+    subType: idp
+    provId: myGoogleIDP
   actions:
     . . .
   objects:
     . . .
 ```
 A subject value is an object consisting of the following attributes:
-* `condition` - An OPTIONAL condition clause which MAY be used for matching purposes. See 
-  [Section 4.7 Using Conditions](#4.7 Using Conditions).
-* `subType` - A text value indicating the type of subject provider being referenced. Supported values include:
- 
-  * `any` - Any subject whether authenticated or anonymous
+* `subType` - A text value indicating the type of subject provider being referenced. Supported values include: 
+  * `any` - Any subject whether authenticated or anonymous (this is the same is not specifying a subject)
   * `auth` - Any authenticated subject using any Identity Provider
   * `basic` - A subject authenticated using [HTTP Basic Auth (RFC7617)](https://datatracker.ietf.org/doc/html/rfc7617).
   * `jwt` - A subject that is authenticated by validating a
@@ -415,17 +367,14 @@ A subject value is an object consisting of the following attributes:
     Server (RFC6749)](https://datatracker.ietf.org/doc/html/rfc6749).
   * `op` - A subject authenticated with a JWT token issued by an [OpenID Provider](https://openid.net).
   * `saml` - A subject authenticated with an XML SAML assertion using a SAML IDP.
-  * `ref` - Allows a rule scoped to a specific URI to be applied. E.g. it could be a specific subject from a JWT token.
   * `net` - A subject identified by the client requestor's network address expressed as an IP address or 
     [CIDR (RFC1817)](https://datatracker.ietf.org/doc/html/rfc1817) value. 
     Used for access control for internal services.
   * `other` - A custom provider _[TODO: do we need this?]_
 
-When `subType` is one of: `basic`, `jwt`, `op`, `saml`, or `other`, the attribute `authId` specifies the identifier of an Identity 
+When `subType` is one of: `basic`, `jwt`, `op`, `saml`, or `other`, the attribute `provId` specifies the identifier of an Identity 
 Provider configured as part of the policy project assets.
-
-When `subType` is `ref`, an attribute of `ref` is used to identify a URI for matching a subject. The process for which 
-matching occurs is not defined by this specification.
+> Discuss:  do we need `subType`?  Can be inferred by the use of provId vs other attributes like `cidr`.
 
 When `subType` is `net`, an attribute of `cidr` is used to specify an IP Address or network mask (CIDR).
 
@@ -451,7 +400,8 @@ idql-policies:
   objects:
     . . .
 ```
- 
+> TODO:  Need a couple example URIs from Google, AWS, Azure.
+
 An action consists of the following attributes:
 * `name` - An OPTIONAL unique identifier for an action.
 * `actionUri` - A URI of the form `<domain>:<protocol>:<method>:<pathSpec>?<param-qual>` where
@@ -463,15 +413,13 @@ An action consists of the following attributes:
     * `<pathSpec>` - A URI file path which MAY include a wildcard (`*`). For example: `/Users/*`.
 * `exclude` - When set to true, the action MAY be used to invert the action. For example, everything is permitted 
   except for `https:PUT|PATCH|DELETE:/*`
-* `condition` - An action MAY have a matching condition applied. See
-  [Section 4.7 Using Conditions](#4.7 Using Conditions).
 
 URIs and paths may contain wildcards (`*`) and may contain
 variables denoted by `${<variable>}` where <variable> is the variable name (e.g. calculated by a scope).
 
 >TODO: Should we have multiple URI types specified?  E.g.  actions that match to roles?
 
-### 4.5 Objects
+### 4.5 Object
 
 Objects are assets in a project which are protected by policy. Objects are an identified asset combined with a path 
 specification.
@@ -495,8 +443,6 @@ An object consists of the following attributes:
 * `pathSpec` - A string representing a path or path filter including wildcards or variables. A path may contain wildcards (`*`) and may contain
   variables denoted by `${<variable>}` where <variable> is the variable name (e.g. calculated by a scope).
 * `pathRegEx` - A [Regular Expression](https://en.wikipedia.org/wiki/Regular_expression) used for matching request paths.
-* `condition` - An object MAY have a matching condition applied. See
-  [Section 4.7 Using Conditions](#4.7 Using Conditions).
 
 ### 4.6 Scopes
 
@@ -533,8 +479,6 @@ A scope consists of the following attributes:
 * `value` - The value to be assigned. The value may be a static string or integer, or may be a string using variable 
   substitution denoted by `${<variable>}` where <variable> is the variable name.  For example: `"admin-${User:employeeType}"`
 _[TODO: should multi-value and other types be allowed? E.g. use square brackets?]_
-* `condition` - An scope MAY have a matching condition applied. See
-  [Section 4.7 Using Conditions](#4.7 Using Conditions).
 
 Note in the above scope example:
 * workCountry is a scope variable `workCountry` that is defined as the employee's work
@@ -542,29 +486,25 @@ address. The qualifier `[type eq work]` selects the work address value from the 
 assigns the value of sub-attribute `country`.
 * `adminType` is assigned `admin-contractor` if the User's `employeeType` attribute is equal to `contract`.
 
-### 4.7 Using Conditions
-An IDQL condition can be applied to `subjects`, `actions`, `objects`, and `scopes`. Conditions are used to qualify whether a 
-subject, action, or object is to be applied, or in the case of a scope, whether an attribute is to be assigned.
+### 4.7 Condition
+Conditions are used to qualify whether a subject, action, or object is to be applied. A common usage is to identify 
+a role or scope a subject must possess. Multiple conditions MAY be expressed by using an `or` or `and` clause.
 
 ```yaml
 idql-policies:
 - id: example-policy
   meta:
     . . .
-  subjects:
-  - subType: idp
-    authId: myGoogleIDP
-    condition:
-      rule: subject.jwt.iss eq oidc.strata.io
-      action: allow
+  subject:
+    subType: idp
+    provId: myGoogleIDP
   actions:
   - name: createProfile
     actionUri: https:POST:/Users/
   - name: editProfile
     actionUri: https:PUT|PATCH:/Users/*
-    condition:
-      rule: adminType eq admincontractor
-      action: deny
+  condition:
+    rule: role eq admincontractor and subject.jws.iss eq oidc.strata.io
   objects:
     . . .
 ```

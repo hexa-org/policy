@@ -4,254 +4,254 @@
   "title": "IDQL Policy",
   "description": "Schema for IDQL Policy statements",
   "type": "object",
-  "required": ["id","subjects","actions","objects"],
+  "required": ["idql-policies"],
   "properties": {
-    "id": {
-      "type": "uri",
-      "description": "A unique identifier for the policy"
-    },
-    "meta": {
-      "type": "object",
-      "properties": {
-        "date": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Optional modification date in DateTime format (e.g., 2008-01-23T04:56:22Z)"
-        },
-        "app": {
-          "type": "string",
-          "description": "An app identifier to link related policies together for an application"
-        },
-        "vers": {
-          "type": "string",
-          "description": "A version identifier to distinguish different policy versions"
-        },
-        "etag": {
-          "type": "string",
-          "description": "A hash of the current policy per Section 2.3 of [RFC7232]."
-        },
-        "disp": {
-          "type": "string",
-          "description": "A human readable description of the policy"
-        },
-        "layer": {
-          "type": "string",
-          "description": "An identifier to allow grouping of policies (e.g. Network, App, Data)"
-        }
-      }
-    },
-    "subjects": {
+    "idql-policies" : {
       "type": "array",
       "items": {
+        "type": "object",
+        "required": ["id","actions","object"],
         "properties": {
-          "condition": {
-            "description": "A condition that may be applied to limit subject matches for a source",
-            "$ref": "https://github.com/independentid/IDQL-specs/schema/idql-condition.schema.json"
+          "id": {
+            "type": "uri",
+            "description": "A unique identifier for the policy"
           },
-          "subType": {
-            "enum": ["any","auth","basic","jwt","op","saml","ref","net","other"],
-            "description": "The subject type which is one of any|basic|jwt|idp|ref|net|other"
+          "meta": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Optional modification date in DateTime format (e.g., 2008-01-23T04:56:22Z)"
+              },
+              "app": {
+                "type": "string",
+                "description": "An app identifier to link related policies together for an application"
+              },
+              "vers": {
+                "type": "string",
+                "description": "A version identifier to distinguish different policy versions"
+              },
+              "etag": {
+                "type": "string",
+                "description": "A hash of the current policy per Section 2.3 of [RFC7232]."
+              },
+              "disp": {
+                "type": "string",
+                "description": "A human readable description of the policy"
+              },
+              "layer": {
+                "type": "string",
+                "description": "An identifier to allow grouping of policies (e.g. Network, App, Data)"
+              }
+            }
           },
-          "allOf": [
-            {
-              "$comment": "This validates type subject type 'basic'.",
-              "if": {
-                "properties": { "subType": { "const": "basic" }},
-                "required": ["subType"]
-              },
-              "then": {
-                "properties": {
-                  "authId" : {
-                    "type": "uri",
-                    "description": "The identifier of a provider that does HTTP Basic Authentication"
-                  }
-                }
-              }
-            },
 
-            {
-              "$comment": "This validates a JWT (e.g. OAuth2) based authorization",
-              "if": {
-                "properties": { "subType":  {"const":  "jwt"}},
-                "required": ["subType"]
+          "subject": {
+            "type": "object",
+            "properties": {
+              "subType": {
+                "enum": ["any","auth","basic","jwt","op","saml","net","other"],
+                "description": "The subject type which is one of any|basic|jwt|idp|ref|net|other"
               },
-              "then": {
-                "properties": {
-                  "authId" : {
-                    "type": "uri",
-                    "description": "The identifier of a provider that does JWT validation"
+              "allOf": [
+                {
+                  "$comment": "This validates type subject type 'basic'.",
+                  "if": {
+                    "properties": { "subType": { "const": "basic" }},
+                    "required": ["subType"]
+                  },
+                  "then": {
+                    "properties": {
+                      "authId" : {
+                        "type": "uri",
+                        "description": "The identifier of a provider that does HTTP Basic Authentication"
+                      }
+                    }
                   }
-                }
-              }
-            },
+                },
 
-            {
-              "$comment": "This validates a authorization based on OIDC provider",
-              "if": {
-                "properties": { "subType":  {"const":  "op"}},
-                "required": ["subType"]
-              },
-              "then": {
-                "properties": {
-                  "authId" : {
-                    "type": "uri",
-                    "description": "The identifier of an OIDC Provider"
+                {
+                  "$comment": "This validates a JWT (e.g. OAuth2) based authorization",
+                  "if": {
+                    "properties": { "subType":  {"const":  "jwt"}},
+                    "required": ["subType"]
+                  },
+                  "then": {
+                    "properties": {
+                      "authId" : {
+                        "type": "uri",
+                        "description": "The identifier of a provider that does JWT validation"
+                      }
+                    }
                   }
-                }
-              }
-            },
+                },
 
-            {
-              "$comment": "This validates a authorization based a SAML IDP provider",
-              "if": {
-                "properties": { "subType":  {"const":  "saml"}},
-                "required": ["subType"]
-              },
-              "then": {
-                "properties": {
-                  "authId" : {
-                    "type": "uri",
-                    "description": "The identifier of a SAML Provider"
+                {
+                  "$comment": "This validates a authorization based on OIDC provider",
+                  "if": {
+                    "properties": { "subType":  {"const":  "op"}},
+                    "required": ["subType"]
+                  },
+                  "then": {
+                    "properties": {
+                      "authId" : {
+                        "type": "uri",
+                        "description": "The identifier of an OIDC Provider"
+                      }
+                    }
                   }
-                }
-              }
-            },
+                },
 
-            {
-              "$comment": "This validates a authorization based subject URI",
-              "if": {
-                "properties": { "subType":  {"const":  "ref"}},
-                "required": ["subType"]
-              },
-              "then": {
-                "properties": {
-                  "ref" : {
-                    "type": "uri",
-                    "description": "The URI of a subject",
-                    "format": "uri-reference"
+                {
+                  "$comment": "This validates a authorization based a SAML IDP provider",
+                  "if": {
+                    "properties": { "subType":  {"const":  "saml"}},
+                    "required": ["subType"]
+                  },
+                  "then": {
+                    "properties": {
+                      "authId" : {
+                        "type": "uri",
+                        "description": "The identifier of a SAML Provider"
+                      }
+                    }
                   }
-                }
-              }
-            },
+                },
 
-            {
-              "$comment": "This validates a authorization based on a network mask(s)",
-              "if": {
-                "properties": { "subType":  {"const":  "net"}},
-                "required": ["subType"]
-              },
-              "then": {
-                "properties": {
-                  "cidr" : {
-                    "description": "A list of CIDR values to be accepted",
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "$comment": "IP address matches based in an IPv4 CIDR",
-                      "pattern": "^(([01]?\\d?\\d|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d?\\d|2[0-4]\\d|25[0-5])\/(\\d{1}|[0-2]{1}\\d{1}|3[0-2])$"
+                {
+                  "$comment": "This validates a authorization based on a network mask(s)",
+                  "if": {
+                    "properties": { "subType":  {"const":  "net"}},
+                    "required": ["subType"]
+                  },
+                  "then": {
+                    "properties": {
+                      "cidr" : {
+                        "description": "A list of CIDR values to be accepted",
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "$comment": "IP address matches based in an IPv4 CIDR",
+                          "pattern": "^(([01]?\\d?\\d|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d?\\d|2[0-4]\\d|25[0-5])\/(\\d{1}|[0-2]{1}\\d{1}|3[0-2])$"
+                        }
+                      }
+                    }
+                  }
+                },
+
+                {
+                  "$comment": "This validates a authorization OTHER provider",
+                  "if": {
+                    "properties": { "subType":  {"const":  "other"}},
+                    "required": ["subType"]
+                  },
+                  "then": {
+                    "properties": {
+                      "authId" : {
+                        "type": "string",
+                        "description": "The identifier of a provider"
+                      }
                     }
                   }
                 }
-              }
-            },
+              ]
+            }
+          },
 
-            {
-              "$comment": "This validates a authorization OTHER provider",
-              "if": {
-                "properties": { "subType":  {"const":  "other"}},
-                "required": ["subType"]
-              },
-              "then": {
-                "properties": {
-                  "authId" : {
-                    "type": "string",
-                    "description": "The identifier of a provider"
-                  }
-                }
+          "actions": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "name" : {
+                  "type": "string",
+                  "description": "A human readable name for the action"
+                },
+                "actionUri": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "exclude": {
+                  "type": "boolean",
+                  "description": "When exclude is true, the action is not permitted (implying all other actions permitted)"
+                },
+                "condition": {
+                  "description": "A condition that may be applied to limit matches for a particular action",
+                  "$ref": "https://github.com/independentid/IDQL-specs/schema/idql-condition.schema.json"
+                },
+                "required": ["actionUri"]
               }
             }
-          ]
-        }
-      }
-    },
+          },
 
-    "actions": {
-      "type": "array",
-      "items": {
-        "properties": {
-          "name" : {
-            "type": "string",
-            "description": "A human readable name for the action"
+          "object": {
+            "$comment": "Objects are the things upon which a policy is applied.",
+            "type": "object",
+            "properties": {
+              "assetId": {
+                "type": "uri",
+                "description": "The identifier of an asset that is protected by policy"
+              },
+              "pathSpec": {
+                "type": "string",
+                "description": "A path specification (may include wildcards)",
+                "format": "uri-reference"
+              },
+              "pathRegEx": {
+                "type": "string",
+                "description": "A regex expression used to match a request path",
+                "format": "regex"
+              },
+              "required": ["assetId"]
+            }
           },
-          "actionUri": {
-            "type": "string",
-            "format": "uri"
+
+          "scopes" : {
+            "$comment" : "Scope allows one or more variables (tags) to be defined based on a condition.",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "A tag key name which may be referenced",
+                  "format": "uri"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "A static or dynamic value. Variables may be inserted using ${attr} notation",
+                  "$comment": "Example: canaryAdmin-${User:userType} may resolve as 'canaryAdmin-employee'"
+                },
+                "condition": {
+                  "description": "A condition that may be applied to the tag assignment",
+                  "$ref": "https://github.com/independentid/-specs/schema/idql-condition.schema.json",
+
+                  "$comment": "Example: User:roles eq admin"
+                },
+                "required": ["name","value"]
+              }
+            }
           },
-          "exclude": {
-            "type": "boolean",
-            "description": "When exclude is true, the action is not permitted (implying all other actions permitted)"
-          },
+
           "condition": {
-            "description": "A condition that may be applied to limit matches for a particular action",
-            "$ref": "https://github.com/independentid/IDQL-specs/schema/idql-condition.schema.json"
-          },
-         "required": ["actionUri"]
-        }
-      }
-    },
-
-    "objects": {
-      "$comment": "Objects are the things upon which a policy is applied.",
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "properties": {
-          "assetId": {
-            "type": "uri",
-            "description": "The identifier of an asset that is protected by policy"
-          },
-          "pathSpec": {
-            "type": "string",
-            "description": "A path specification (may include wildcards)",
-            "format": "uri-reference"
-          },
-          "pathRegEx": {
-            "type": "string",
-            "description": "A regex expression used to match a request path",
-            "format": "regex"
-          },
-          "condition": {
-            "description": "A condition that may be applied to limit matches for a particular action",
-            "$ref": "https://github.com/independentid/IDQL-specs/schema/idql-condition.schema.json"
-          },
-          "required": ["assetId"]
-        }
-      }
-    },
-
-    "scopes" : {
-      "$comment" : "Scope allows one or more variables (tags) to be defined based on a condition.",
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "A tag key name which may be referenced",
-            "format": "uri"
-          },
-          "value": {
-            "type": "string",
-            "description": "A static or dynamic value. Variables may be inserted using ${attr} notation",
-            "$comment": "Example: canaryAdmin-${User:userType} may resolve as 'canaryAdmin-employee'"
-          },
-          "condition": {
-            "description": "A condition that may be applied to the tag assignment",
-            "$ref": "https://github.com/independentid/-specs/schema/idql-condition.schema.json",
-
-            "$comment": "Example: User:roles eq admin"
-          },
-          "required": ["name","value"]
+            "type": "object",
+            "required": ["rule"],
+            "properties": {
+              "rule": {
+                "type": "string",
+                "description": "A filter defining a matching condition based on RFC7644 Sec 3.4.2.2"
+              },
+              "action": {
+                "enum": [
+                  "allow",
+                  "deny",
+                  "audit",
+                  "disabled"
+                ],
+                "description": "The outcome desired if condition is a match (default='allow')"
+              }
+            }
+          }
         }
       }
     }
