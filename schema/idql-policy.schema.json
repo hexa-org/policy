@@ -235,11 +235,14 @@
 
           "condition": {
             "type": "object",
-            "required": ["rule"],
             "properties": {
               "rule": {
                 "type": "string",
-                "description": "A filter defining a matching condition based on RFC7644 Sec 3.4.2.2"
+                "description": "Logic the constrains a request based on attributes about the context of the request(origin, target resource). Conditions are expressed as a filter defining a matching condition based on RFC7644 Sec 3.4.2.2"
+              },
+              "role": {
+                "type": "string",
+                "description": "A role implies a set of permissions that provide the ability to execute the actions specified in 'actions'."
               },
               "action": {
                 "enum": [
@@ -250,7 +253,11 @@
                 ],
                 "description": "The outcome desired if condition is a match (default='allow')"
               }
-            }
+            },
+            "anyOf": [
+              { "required": ["rule"] },
+              { "required": ["role"] }
+            ]
           }
         }
       }

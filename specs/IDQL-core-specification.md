@@ -85,6 +85,8 @@ idql-policies:
   object:
     assetId: CanaryProfileService
     pathSpec: /Profile/*
+  condition:
+    role: canaryAccountCreator
 - id: EditProfileGoogleUpdate AdminContractor
   meta:
     vers: 0.1
@@ -150,6 +152,9 @@ The JSON representation of the YAML policy above:
       "object": {
         "assetId": "CanaryProfileService",
         "pathSpec": "/Profile/*"
+      },
+      "condition" : {
+        "role": "canaryAccountCreator"
       }
     },
     {
@@ -255,17 +260,21 @@ services for IDQL will handle delivery and configuration with the defined policy
 In addition to Identity Provider claims or attributes, the following attributes MAY be used in relation to an 
 authenticated subject:
 * `subject.provId` - The identifier for the provider under which the subject was authenticated.
+* `subject.req` - To access request context information
+  * `ip` - The IP address of the requestor.
+  * `protocol` - The protocol portion of the request URI (e.g. HTTP).
+  * `param.<name>` - Returns the value of any request parameter in the URI following and separated by the ampersand
+    (&). If a parameter is repeated, it is treated as a multi-value for the purposes of filter comparison.
+  * `uri` - The full request URI sent by the client.
+  * `path` - The path portion of the request URI.
+
+  * `query` - Returns any information contained after a `?` in a request URI.
+
 * `subject.http` - To access HTTP request information.
   * `header.<header-name>` - May be used to compare the value of a particular http header. If multiple headers of 
     the same name exists, then the value is considered muli-valued. Any comparison that matches a single-value SHALL 
     be considered a match. For example `subject.http.header.authorization sw bearer`.
-  * `ip` - The IP address of the requestor.
   * `method` - The HTTP Method used to make the request (e.g. GET, POST, DELETE, PUT, PATCH).
-  * `param.<name>` - Returns the value of any request parameter in the URI following and separated by the ampersand 
-    (&). If a parameter is repeated, it is treated as a multi-value for the purposes of filter comparison.
-  * `path` - The path portion of the request URI.
-  * `protocol` - The protocol portion of the request URI (e.g. HTTP).
-  * `query` - Returns any information contained after a `?` in a request URI.
   
 * `subject.jwt.<claim>` - If a JWT was used, specific claims can be compared where <claim> is the name of a claim. For 
   example `subject.jwt.iss eq my.example.com`
@@ -293,6 +302,7 @@ Each Policy Statement consists of the following attributes:
 * `object` - The target assets against which policy is applied.
 * `scopes` - Defines attributes which may be used as additional qualifiers against subjects, actions, actions, or in 
   conditions applied to policy.
+* `condition` - An OPTIONAL condition that specifies either a `rule` or `role` for which the policy applies.
 
 ### 4.1 Id Attribute
 
@@ -487,8 +497,7 @@ assigns the value of sub-attribute `country`.
 * `adminType` is assigned `admin-contractor` if the User's `employeeType` attribute is equal to `contract`.
 
 ### 4.7 Condition
-Conditions are used to qualify whether a subject, action, or object is to be applied. A common usage is to identify 
-a role or scope a subject must possess. Multiple conditions MAY be expressed by using an `or` or `and` clause.
+Conditions are used to qualify whether a subject, action, or object is to be applied. 
 
 ```yaml
 idql-policies:
@@ -509,31 +518,38 @@ idql-policies:
     . . .
 ```
 
-A condition has two attributes:
+A condition consists of a `role` or a `rule` and an optional `action`:
+* `role` - Defines a role which the subject MUST possess for the `action` to be triggered. A role implies a set of
+  permissions that provide the ability to execute the actions specified. Multiple role values MAY be specified using
+  a comma separator. If mulitple roles are specified, ALL must be present.
 * `rule` - A matching filter that uses a SCIM filter value as specified in Section
   [3.4.2.2 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.2). In addition to using SCIM 
-  attribute names for User objects, each provider and object may define additional attributes that MAY be used 
-  during policy evaluation. These may be referred to by their simple name. Scope attribute names MAY also be 
-  referred to by their name. For example: `User:employeeType eq contract`. Filter values MAY be URL-encoded per 
+  attribute names for User objects, each provider and object may define additional contextual (client ip, path, etc.) 
+  attributes that MAY be used during policy evaluation. These may be referred to by their simple name. Scope attribute 
+  names MAY also be 
+  referred to by their name. For example: `subject.req.ip eq 192.168.1.10`.   Filter values MAY be URL-encoded per 
   [Section 2.1 of RFC3986](https://datatracker.ietf.org/doc/html/rfc3986#section-2.1).
-* `action` - Indicates the desired effect of the condition which may be:
-  * `allow` - Proceeds if there is a match. Allow is the default.
+* `action` - Indicates the desired effect of the condition. When omitted, the default is `allow`. Valid values are:
+  * `allow` - Proceeds if there is a match.   
   * `deny` - Negates the outcome if there is a match.
-  * `audit` - The rule is not enforced, but processing outcome is logged. 
-  * `disabled` - The condition is ignored. _[TODO: How does this impact matching?]_
+  * `audit` - The rule is not enforced, but processing outcome is logged.
 
 ---
 ## 5.0 Evaluation Processing Rules
 
-_What happens when no values provided for subjects/actions/objects?_
-
-_What happens when multiple values are provided for subjects/actions/objects?_
-
-_In the absense of matches deny is always the default._
-
-Deny always supersedes Allow.  With no permissive rule, deny is the default response.
+>What happens when no values provided for subjects/actions/objects?
+>
+>What happens when multiple values are provided for subjects/actions/objects?
+>
+>In the absense of matches deny is always the default.
+>
+>Deny always supersedes Allow.  With no permissive rule, deny is the default response.
 
 ---
 ## 6.0 Deployment Lifecycle
 
-_[TODO: Define a typical lifecycle. Does this belong here?]_
+>Define a typical lifecycle. Does this belong here?
+
+## 7.0 Appendix A - Use Cases
+
+>TODO

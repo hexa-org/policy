@@ -22,6 +22,9 @@
       "object": {
         "assetId": "CanaryProfileService",
         "pathSpec": "/Profile/*"
+      },
+      "condition": {
+        "role": "canaryAccountCreator"
       }
     },
     {
