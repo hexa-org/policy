@@ -244,6 +244,13 @@
                 "type": "string",
                 "description": "A role implies a set of permissions that provide the ability to execute the actions specified in 'actions'."
               },
+              "members": {
+                "type": "array",
+                "description": "",
+                "items": {
+                  "type": "string"
+                }
+              },
               "action": {
                 "enum": [
                   "allow",

@@ -263,11 +263,11 @@ authenticated subject:
 * `subject.req` - To access request context information
   * `ip` - The IP address of the requestor.
   * `protocol` - The protocol portion of the request URI (e.g. HTTP).
+  * `time` - The time of the client request
   * `param.<name>` - Returns the value of any request parameter in the URI following and separated by the ampersand
     (&). If a parameter is repeated, it is treated as a multi-value for the purposes of filter comparison.
   * `uri` - The full request URI sent by the client.
   * `path` - The path portion of the request URI.
-
   * `query` - Returns any information contained after a `?` in a request URI.
 
 * `subject.http` - To access HTTP request information.
@@ -340,14 +340,17 @@ Versioning attributes include:
   and MUST include both a date and a time. A `date` SHALL have no case sensitivity or uniqueness.
 * `vers` - A version identifier used to distinguish different policy versions (e.g. 1.0.1)
 * `etag` - A hash value of the current policy statement per 
-  [Section 2.3 of RFC7232](https://datatracker.ietf.org/doc/html/rfc7232#section-2.3). This value is often used as a 
-  request pre-condition to ensure a policy being updated has not already been altered.
+  [Section 2.3 of RFC7232](https://datatracker.ietf.org/doc/html/rfc7232#section-2.3). This value is often used (e.g.
+  [Google Cloud Policy](https://cloud.google.com/iam/docs/policies#etag)) as a 
+  request pre-condition to ensure a policy being updated has not already been altered by another entity 
+  (administrative system).
 
 Informational attributes include:
 * `app` - An OPTIONAL string identifier that may be used to group policy statments pertaining to a common application.
 * `disp` - An OPTIONAL string containing a description of the intent of the policy.
 * `layer` - An OPTIONAL string identifier that may be used to group policy statements in a common container or 
   application layer.
+
 
 ### 4.3 Subject
 
@@ -552,4 +555,80 @@ A condition consists of a `role` or a `rule` and an optional `action`:
 
 ## 7.0 Appendix A - Use Cases
 
->TODO
+From Google Policy, [a user is assigned to a role as a binding](https://cloud.google.com/iam/docs/policies#basic).
+```json
+{
+  "bindings": [
+    {
+      "members": [
+        "user:jie@example.com"
+      ],
+      "role": "roles/resourcemanager.organizationAdmin"
+    },
+    {
+      "members": [
+        "user:raha@example.com",
+        "user:jie@example.com"
+      ],
+      "role": "roles/resourcemanager.projectCreator"
+    }
+  ],
+  "etag": "BwUjMhCsNvY=",
+  "version": 1
+}
+```
+
+In the example below, the Google GCP bind example becomes:
+```json
+{ "idql-policies": [
+  {
+    "id": "Bind example to role part 1",
+    "meta": {
+    },
+    "subject": {
+      "subType": "op",
+      "provId": "myGoogleIDP"
+    },
+    "scopes": [
+      {"name": "role",
+        "value": "roles/resourcemanager.organizationAdmin"}
+    ],
+    "condition": {
+      "members": [ "user:jie@example.com" ],
+      "action": "bind"
+    }
+  }
+  {
+    "id": "Bind example to role part 2",
+    "meta": {
+    },
+    "subject": {
+      "subType": "op",
+      "provId": "myGoogleIDP"
+    },
+    "scopes": [
+      {"name": "role",
+        "value": "roles/resourcemanager.projectCreator"}
+    ],
+    "condition": {
+      "members": [ "user:raha@example.com", "user:jie@example.com" ],
+      "action": "bind",
+      "rule": "subject.req.time lt 2022-07-01T00:00:00.000Z"
+    }
+  }
+]}
+```
+
+Issues:
+* No objects or actions
+* Should the binding be implicit?  E.g. the gateway figures out that a binding policy needs to be created when 
+  creating an access policy at an object?
+* this is kind of like IDP policy vs. Resource Policy.  An IDP policy modifies the subject. A resource policy 
+   modifies the request
+* When mapping across platforms, do we convert a single access policy into a bind plus resource policy (two policies)?
+* [Google Member prefixes](https://cloud.google.com/iam/docs/overview#cloud-iam-policy) are:
+  * user:
+  * serviceAccount:
+  * group:
+  * domain:
+   

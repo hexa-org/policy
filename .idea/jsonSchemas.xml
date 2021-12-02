@@ -11,6 +11,11 @@
               <option name="patterns">
                 <list>
                   <Item>
+                    <option name="directory" value="true" />
+                    <option name="path" value="examples" />
+                    <option name="mappingKind" value="Directory" />
+                  </Item>
+                  <Item>
                     <option name="path" value="examples/idql-example.json" />
                   </Item>
                 </list>
