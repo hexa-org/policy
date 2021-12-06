@@ -558,7 +558,9 @@ A condition consists of a `role` or a `rule` and an optional `action`:
 
 #### Google Role Binding
 
-From Google Policy, [a user is assigned to a role as a binding](https://cloud.google.com/iam/docs/policies#basic).
+From Google Policy, [a user is assigned to a role as a binding](https://cloud.google.com/iam/docs/policies#basic). 
+IAP allows an authenticated user with a role binding through to the app. It doesn't really perform RBAC in the sense 
+of matching an incoming role with an allowed role. 
 ```json
 {
   "bindings": [
@@ -573,7 +575,12 @@ From Google Policy, [a user is assigned to a role as a binding](https://cloud.go
         "user:raha@example.com",
         "user:jie@example.com"
       ],
-      "role": "roles/resourcemanager.projectCreator"
+      "role": "roles/resourcemanager.projectCreator",
+      "condition": {
+        "title": "Expires July 1, 2022",
+        "description": "Expires on July 1, 2022",
+        "expression": "request.time < timestamp('2022-07-01T00:00:00.000Z')"
+      }
     }
   ],
   "etag": "BwUjMhCsNvY=",
