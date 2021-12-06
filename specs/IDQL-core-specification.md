@@ -260,7 +260,7 @@ services for IDQL will handle delivery and configuration with the defined policy
 In addition to Identity Provider claims or attributes, the following attributes MAY be used in relation to an 
 authenticated subject:
 * `subject.provId` - The identifier for the provider under which the subject was authenticated.
-* `subject.req` - To access request context information
+* `req` - To access request context information
   * `ip` - The IP address of the requestor.
   * `protocol` - The protocol portion of the request URI (e.g. HTTP).
   * `time` - The time of the client request
@@ -269,12 +269,11 @@ authenticated subject:
   * `uri` - The full request URI sent by the client.
   * `path` - The path portion of the request URI.
   * `query` - Returns any information contained after a `?` in a request URI.
-
-* `subject.http` - To access HTTP request information.
-  * `header.<header-name>` - May be used to compare the value of a particular http header. If multiple headers of 
-    the same name exists, then the value is considered muli-valued. Any comparison that matches a single-value SHALL 
-    be considered a match. For example `subject.http.header.authorization sw bearer`.
-  * `method` - The HTTP Method used to make the request (e.g. GET, POST, DELETE, PUT, PATCH).
+  * `http` - To access HTTP request information.
+    * `header.<header-name>` - May be used to compare the value of a particular http header. If multiple headers of 
+      the same name exists, then the value is considered muli-valued. Any comparison that matches a single-value SHALL 
+      be considered a match. For example `req.http.header.authorization sw bearer`.
+    * `method` - The HTTP Method used to make the request (e.g. GET, POST, DELETE, PUT, PATCH).
   
 * `subject.jwt.<claim>` - If a JWT was used, specific claims can be compared where <claim> is the name of a claim. For 
   example `subject.jwt.iss eq my.example.com`
@@ -516,7 +515,7 @@ idql-policies:
   - name: editProfile
     actionUri: https:PUT|PATCH:/Users/*
   condition:
-    rule: role eq admincontractor and subject.jws.iss eq oidc.strata.io
+    rule: role eq admincontractor and subject.jwt.iss eq oidc.strata.io
   objects:
     . . .
 ```
@@ -530,7 +529,7 @@ A condition consists of a `role` or a `rule` and an optional `action`:
   attribute names for User objects, each provider and object may define additional contextual (client ip, path, etc.) 
   attributes that MAY be used during policy evaluation. These may be referred to by their simple name. Scope attribute 
   names MAY also be 
-  referred to by their name. For example: `subject.req.ip eq 192.168.1.10`.   Filter values MAY be URL-encoded per 
+  referred to by their name. For example: `req.ip eq 192.168.1.10`.   Filter values MAY be URL-encoded per 
   [Section 2.1 of RFC3986](https://datatracker.ietf.org/doc/html/rfc3986#section-2.1).
 * `action` - Indicates the desired effect of the condition. When omitted, the default is `allow`. Valid values are:
   * `allow` - Proceeds if there is a match.   
@@ -555,6 +554,10 @@ A condition consists of a `role` or a `rule` and an optional `action`:
 
 ## 7.0 Appendix A - Use Cases
 
+### Case 1 Role Policy
+
+#### Google Role Binding
+
 From Google Policy, [a user is assigned to a role as a binding](https://cloud.google.com/iam/docs/policies#basic).
 ```json
 {
@@ -578,7 +581,7 @@ From Google Policy, [a user is assigned to a role as a binding](https://cloud.go
 }
 ```
 
-In the example below, the Google GCP bind example becomes:
+In IDQL, the Google GCP bind example becomes:
 ```json
 { "idql-policies": [
   {
@@ -613,7 +616,7 @@ In the example below, the Google GCP bind example becomes:
     "condition": {
       "members": [ "user:raha@example.com", "user:jie@example.com" ],
       "action": "bind",
-      "rule": "subject.req.time lt 2022-07-01T00:00:00.000Z"
+      "rule": "req.time lt 2022-07-01T00:00:00.000Z"
     }
   }
 ]}
@@ -632,3 +635,135 @@ Issues:
   * group:
   * domain:
    
+#### AWS API Gateway Policy
+
+A resource policy may be attached to an 
+[API Gateway](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-control-access-policy-language-overview.html).  Example policy...
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "execute-api:Invoke",
+            "Resource": "arn:aws:execute-api:region:account-id:*"
+        },
+        {
+            "Effect": "Deny",
+            "Principal": "*",
+            "Action": "execute-api:Invoke",
+            "Resource": "arn:aws:execute-api:region:account-id:*",
+            "Condition": {
+                "NotIpAddress": {
+                    "aws:SourceIp": "123.4.5.6/24"
+                }
+            }
+        }
+    ]
+}
+```
+
+In this example, an IDQL equivalent might be:
+
+```json
+{ "idql-policies": [
+  {
+    "id": "anon-execute-api-invoke",
+    "meta": {
+      "vers": "2012-10-17"
+    },
+    "subject": {
+      "subType": "any"
+    },
+    "actions": [
+      {
+        "actionUri": "execute-api:Invoke"
+      }      
+    ],
+    "object": {
+      "assetId": "myAwsAPIGateway",
+      "pathSpec": "arn:aws:execute-api:region:account-id:*"
+    }
+  },
+  {
+    "id": "block-anon-execute-api-invoke",
+    "meta": {
+      "vers": "2012-10-17"
+    },
+    "subject": {
+      "subType": "net",
+      "cidr": "123.4.5.6/24"
+    },
+    "actions": [
+      {
+        "actionUri": "execute-api:Invoke"
+      }
+    ],
+    "object": {
+      "assetId": "myAwsAPIGateway",
+      "pathSpec": "arn:aws:execute-api:region:account-id:*"
+    },
+    "condition": {
+      "action": "deny"
+    }
+  }
+]}
+```
+
+Note: the above could be done as one IDQL rule where the condition is: `req.ip ne "123.4.5.6/24"`
+
+#### Azure App role
+
+In Azure, users and groups are assigned roles in the directory using Graph.  You then can add User or Application roles 
+to an application. 
+
+The following policy assigns a User role to an application.
+
+```json
+"appId": "8763f1c4-0000-0000-0000-158e9ef97d6a",
+"appRoles": [
+    {
+      "allowedMemberTypes": [
+        "User"
+      ],
+      "displayName": "Writer",
+      "id": "d1c2ade8-0000-0000-0000-6d06b947c66f",
+      "isEnabled": true,
+      "description": "Writers Have the ability to create tasks.",
+      "value": "Writer"
+    }
+  ],
+"availableToOtherTenants": false,
+```
+
+IDQL equivalent...
+```json
+{ "idql-policies": [
+  {
+    "id": "d1c2ade8-0000-0000-0000-6d06b947c66f",
+    "meta": {
+      "disp": "Writer",
+      "app": "8763f1c4-0000-0000-0000-158e9ef97d6a",
+      "vers": "2012-10-17"
+    },
+    "subject": {
+      "subType": "auth"
+    },
+    "actions": [
+      {
+        "actionUri": "Writer"
+      }      
+    ],
+    "object": {
+      "assetId": "8763f1c4-0000-0000-0000-158e9ef97d6a"
+    },
+    "scopes": [
+      { "name": "allowedMemberTypes",
+        "value": "User"},
+      { "name":  "availableToOtherTenants", 
+        "value": "false"}
+    ]
+  }
+]}
+```
