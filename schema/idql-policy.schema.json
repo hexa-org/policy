@@ -175,10 +175,6 @@
                   "type": "boolean",
                   "description": "When exclude is true, the action is not permitted (implying all other actions permitted)"
                 },
-                "condition": {
-                  "description": "A condition that may be applied to limit matches for a particular action",
-                  "$ref": "https://github.com/independentid/IDQL-specs/schema/idql-condition.schema.json"
-                },
                 "required": ["actionUri"]
               }
             }

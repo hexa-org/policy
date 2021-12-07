@@ -556,30 +556,24 @@ A condition consists of a `role` or a `rule` and an optional `action`:
 
 ### Case 1 Role Policy
 
+-----
 #### Google Role Binding
 
 In Google, a service has a set of "permissions". "Permissions" are exposed as "roles" that may be granted. Google 
-defines these as: Basic, Pre-Defined, and Custom roles.
+defines these as: Basic, Pre-Defined, and Custom roles.  A "permission" is like an IDQL action. For Google products 
+like Identity Access Proxy you cannot define new permissions such as an application role or permission like Canary 
+"EditProfile".  From the context of an application like Canary Bank, IAP just allows users through or not. To 
+enforce RBAC for Canary Bank, the application or another gateway must perform application RBAC.
 
-When creating a custom role, you combine one or more IAM permissions in the form
+In Google Role Binding, roles are predefined. A custom role is simply a custom name for a set of Google defined 
+Permissions. When creating a custom role, you combine one or more IAM permissions in the form
 > `service.resource.verb`
 
-For Google services, permissions resemble 1:1 with REST methods. 
-> Question: Do Google Permissions, correspond with IDQL `actions`?
-
-
-
-Role Documentation:
+Role Documentation References:
 * [Basic and pre-defined roles](https://cloud.google.com/iam/docs/understanding-roles). These roles control basic 
   and administrative access to all Google services and products.
 * [Custom roles information](https://cloud.google.com/iam/docs/understanding-custom-roles) (i.e. application roles)
 
-
-From Google Policy, [a user is assigned to a role as a binding](https://cloud.google.com/iam/docs/policies#basic). 
-IAP allows an authenticated user with a role binding through to the app. It doesn't really perform RBAC in the sense 
-of matching an incoming role with an allowed role. 
-
-Note: The roles being granted are "control plane" roles for administrators.
 
 ```json
 {
@@ -661,6 +655,7 @@ Issues:
   * group:
   * domain:
    
+----
 #### AWS API Gateway Policy
 
 A resource policy may be attached to an 
@@ -739,6 +734,7 @@ In this example, an IDQL equivalent might be:
 
 Note: the above could be done as one IDQL rule where the condition is: `req.ip ne "123.4.5.6/24"`
 
+----
 #### Azure App role
 
 In Azure, users and groups are assigned roles in the directory using Graph.  You then can add User or Application roles 
