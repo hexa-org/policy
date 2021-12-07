@@ -558,9 +558,29 @@ A condition consists of a `role` or a `rule` and an optional `action`:
 
 #### Google Role Binding
 
+In Google, a service has a set of "permissions". "Permissions" are exposed as "roles" that may be granted. Google 
+defines these as: Basic, Pre-Defined, and Custom roles.
+
+When creating a custom role, you combine one or more IAM permissions in the form
+> `service.resource.verb`
+
+For Google services, permissions resemble 1:1 with REST methods. 
+> Question: Do Google Permissions, correspond with IDQL `actions`?
+
+
+
+Role Documentation:
+* [Basic and pre-defined roles](https://cloud.google.com/iam/docs/understanding-roles). These roles control basic 
+  and administrative access to all Google services and products.
+* [Custom roles information](https://cloud.google.com/iam/docs/understanding-custom-roles) (i.e. application roles)
+
+
 From Google Policy, [a user is assigned to a role as a binding](https://cloud.google.com/iam/docs/policies#basic). 
 IAP allows an authenticated user with a role binding through to the app. It doesn't really perform RBAC in the sense 
 of matching an incoming role with an allowed role. 
+
+Note: The roles being granted are "control plane" roles for administrators.
+
 ```json
 {
   "bindings": [
@@ -599,30 +619,32 @@ In IDQL, the Google GCP bind example becomes:
       "subType": "op",
       "provId": "myGoogleIDP"
     },
-    "scopes": [
-      {"name": "role",
-        "value": "roles/resourcemanager.organizationAdmin"}
+    "actions": [
+      {
+        "name": "Role binding",
+        "actionUri" : "roles/resourcemanager.organizationAdmin"
+      }
     ],
     "condition": {
-      "members": [ "user:jie@example.com" ],
-      "action": "bind"
+      "members": [ "user:jie@example.com" ]
     }
   }
   {
-    "id": "Bind example to role part 2",
+    "id": "Bind example to role with condition",
     "meta": {
     },
     "subject": {
       "subType": "op",
       "provId": "myGoogleIDP"
     },
-    "scopes": [
-      {"name": "role",
-        "value": "roles/resourcemanager.projectCreator"}
+    "actions": [
+      {
+        "name": "Role binding",
+        "actionUri" : "roles/resourcemanager.projectCreator"
+      }
     ],
     "condition": {
       "members": [ "user:raha@example.com", "user:jie@example.com" ],
-      "action": "bind",
       "rule": "req.time lt 2022-07-01T00:00:00.000Z"
     }
   }
@@ -630,11 +652,8 @@ In IDQL, the Google GCP bind example becomes:
 ```
 
 Issues:
-* No objects or actions
-* Should the binding be implicit?  E.g. the gateway figures out that a binding policy needs to be created when 
-  creating an access policy at an object?
-* this is kind of like IDP policy vs. Resource Policy.  An IDP policy modifies the subject. A resource policy 
-   modifies the request
+* Objects should probably come from the context of the Google Bind Policy endpoint.
+
 * When mapping across platforms, do we convert a single access policy into a bind plus resource policy (two policies)?
 * [Google Member prefixes](https://cloud.google.com/iam/docs/overview#cloud-iam-policy) are:
   * user:
