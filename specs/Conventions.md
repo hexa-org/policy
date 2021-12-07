@@ -42,7 +42,6 @@ IDQL related APIs will be described using the [OpenAPI 3 Specification](https://
 
 ## Terminology
 
-_[TODO: alphabetize this list when done]_
 
 * _Action_ - An action that a `Subject` may perform. Actions are defined by the target `object` depending on its 
 capabilities.

@@ -1,20 +1,20 @@
 # IDQL Specifications Project
 
-This is the repository for development of IDQL Policy Language. 
+This is the repository for the development of IDQL Policy Language. 
 
 ## Introduction
 
 IDQL's objective is to standardize access policy and associated APIs across the cloud and the stack usable in 
 standalone deployments all the way to hybrid multi-cloud scenarios.
 
-IDQL specifications can be found [here](specs/Specifications.md).
+Quick link to [IDQL specifications](specs/Specifications.md).
 
 ## Why Is IDQL Needed?
-IDQL's goal is to produce a unified policy system because:
-* Multi-cloud access policy does not exist.
-* Incumbent vendors are not motivated to address multi-cloud challenges.
-* Distributed architectures require policy consistency across disparate platforms, domains and technologies.
-* Without a standard there will be inconsistency, risk through silos, greater cost and lock-in.
+IDQL's goal is intended to address the following issues:
+* Multi-cloud access policy does not exist;
+* Incumbent vendors are not motivated to address multi-cloud challenges in the absense of a standard;
+* Distributed architectures require policy consistency across disparate platforms, domains and technologies; and,
+* A standard will provide improved consistency, risk control while avoiding security silos, greater costs, and lock-in.
 
 ![](./collateral/images/IDQL-3d.png "IDQL 3D")
 
