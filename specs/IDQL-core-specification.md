@@ -18,20 +18,26 @@ This document is available for use under the APL 2.0 [Apache License](../LICENSE
 
 ## Table of Contents
 
-* [1.0 Introduction](#1.0 Introduction)
-* [2.0 YAML and JSON Schema and Media-Types](#2.0 YAML and JSON Schema and Media Types)
-* [3.0 Policy and the Policy Gateway](#3.0 Policy and the Policy Gateway)
-  * [3.1 Identity Provider Attributes](#3.1 Identity Provider Attributes)
-* [4.0 IDQL Policy Statements](#4.0 IDQL Policy Statements)
-  * [4.1 Id Attribute](#4.1 Id Attribute)
-  * [4.2 Meta Information](#4.2 Meta Information)
-  * [4.3 Subject](#4.3 Subject)
-  * [4.4 Actions](#4.4 Actions)
-  * [4.5 Object](#4.5 Object)
-  * [4.6 Scopes](#4.6 Scopes)
-  * [4.7 Condition](#4.7 Condition)
-* [5.0 Evaluation Processing Rules](#5.0 Evaluation Processing Rules)
-* [6.0 Deployment Lifecycle](#6.0 Deployment Lifecycle)
+* [1.0 Introduction](#10-introduction)
+* [2.0 YAML and JSON Schema and Media Types](#20-yaml-and-json-schema-and-media-types)
+* [3.0 Policy Environment](#30-policy-environment)
+  * [3.1 Project Context](#31-project-context)
+  * [3.2 Contextual Attributes](#32-contextual-attributes)
+* [4.0 IDQL Policy Statements](#40-idql-policy-statements)
+  * [4.1 Id Attribute](#41-id-attribute)
+  * [4.2 Meta Information](#42-meta-information)
+  * [4.3 Subject](#43-subject)
+  * [4.4 Actions](#44-actions)
+  * [4.5 Object](#45-object)
+  * [4.6 Scopes](#46-scopes)
+  * [4.7 Condition](#47-condition)
+* [5.0 Evaluation Processing Rules](#50-evaluation-processing-rules)
+* [6.0 Deployment Lifecycle](#60-deployment-lifecycle)
+* [7.0 Appendix A - Use Cases](#70-appendix-a---use-cases)
+  * [Case 1 Role Policy](#case-1-role-policy)
+    * [Google Role Binding](#google-role-binding)
+    * [AWS API Gateway Policy](#aws-api-gateway-policy)
+    * [Azure App role](#azure-app-role)
 
 ---
 ## 1.0 Introduction
@@ -232,21 +238,30 @@ though popular is not formally defined. `text` media type is intended for unstru
 and 4.2.5 of RFC6838.
 
 ---
-## 3.0 Policy and the Policy Gateway
+## 3.0 Policy Environment
 
-IDQL requires a project configuration information that provides the data upon which IDQL rules
-may operate. The Policy Gateway provides the following objects
-* _Identity Providers_ define `provId` identifiers which define the `subjects` that MAY be defined in IDQL including 
-  provider type (SAML, OIDC, etc.), their source, and claims available for use in policy rules. Each provider SHOULD 
+In order to define policy, IDQL assumes a pre-defined set of assets where policy will be deployed and a set of 
+Identity Providers that will constitute the subjects against which policy decisions are made. In addition to project 
+information, policy conditions MAY use contextual attributes to apply conditions against run time request information.
+
+### 3.1 Project Context
+
+IDQL assumes project configuration information (e.g. from the Policy Gateway) that defines the sources (subjects) and 
+targets (objects) of 
+data upon which IDQL 
+rules operate. The Policy Gateway provides the following objects
+* _Identity Providers_ define `authId` identifiers are used in a `subject` clause in IDQL. Each provider SHOULD 
   have a set of claims which may be used in policy conditions. Where possible, claims from Identity Providers
-  should be mapped to claims defined by [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.
-  html#Claims). For extended User profile attributes, use 
-  [SCIM User schema under IANA](https://www.iana.org/assignments/scim/scim.xhtml).
-* _Assets_ identified by `assetId` are platforms, components, and services where policy may be potentially assigned. 
-  Typically, an asset will 
-  have a set of permissible `actions` that allowed, denied, and/or scoped in a IDQL policy rule. 
+  should be mapped to claims defined by 
+  * [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.
+    html#Claims). 
+  * And, for extended User profile attributes, use 
+    [SCIM User schema under IANA](https://www.iana.org/assignments/scim/scim.xhtml).
+* _Assets_ identified by `assetId` are platforms, components, and services where policy is being applied. 
+  Typically, an asset has a pre-defied set of permissible `actions` that MAY be allowed, denied, and/or scoped in an 
+  IDQL policy rule. 
  
-In practice, the Policy Gateway is responsible for mapping IDQL Policy to each platform and its native policy system.
+In practice, a Policy Gateway maps IDQL Policy to each platform and its native policy system.
 In different cloud native environments, policy decision and enforcement may occur using different models. Policy 
 deployment, processing (deicisons) and enforcement may be local to the asset (e.g. using the 
 [Open Poilicy Agent sidecar pattern](https://www.openpolicyagent.org/docs/latest/integration/#comparison)), 
@@ -254,13 +269,12 @@ delivered through a shared service Policy Decision Point (PDP), or handled direc
 interfaces, or other method. As a declarative policy system, it is assumed that the policy administrative gateway 
 services for IDQL will handle delivery and configuration with the defined policy assets.
 
+### 3.2 Contextual Attributes
 
-### 3.1 Identity Provider Attributes
+When a policy rule is tested, certain run-time contextual information is made available for IDQL `conditions`.
 
-In addition to Identity Provider claims or attributes, the following attributes MAY be used in relation to an 
-authenticated subject:
-* `subject.provId` - The identifier for the provider under which the subject was authenticated.
-* `req` - To access request context information
+Request context attributes:
+* `req` - Holds information about the incoming request context. E.g. `req.ip` or `req.protocol`.
   * `ip` - The IP address of the requestor.
   * `protocol` - The protocol portion of the request URI (e.g. HTTP).
   * `time` - The time of the client request
@@ -274,7 +288,10 @@ authenticated subject:
       the same name exists, then the value is considered muli-valued. Any comparison that matches a single-value SHALL 
       be considered a match. For example `req.http.header.authorization sw bearer`.
     * `method` - The HTTP Method used to make the request (e.g. GET, POST, DELETE, PUT, PATCH).
-  
+
+Attributes about the current authenticated subject:
+* `subject.provId` - The identifier for the provider under which the subject was authenticated. For example, this
+  may be used when a subject source is `any` or `auth` but a condition applies to a specific provider.
 * `subject.jwt.<claim>` - If a JWT was used, specific claims can be compared where <claim> is the name of a claim. For 
   example `subject.jwt.iss eq my.example.com`
 * `subject.roles` - Roles mapped by the provider to the subject if any.
@@ -294,25 +311,26 @@ A set of IDQL Policy Statements is contained in an array of `idql-policies` whic
 statements".
 
 Each Policy Statement consists of the following attributes:
-* `id` - An OPTIONAL unique attribute for the policy statement
-* `meta` - Metadata about the policy including versioning and descriptions
-* `subject` - A subject identifying the actors a policy is applied to. 
+* `id` - An unique attribute for the policy statement.
+* `meta` - Metadata about the policy including versioning and descriptions.
+* `subject` - A subject identifying the actors a policy is applied to.
 * `actions` - A set of actions that MAY be performed or excluded
 * `object` - The target assets against which policy is applied.
 * `scopes` - Defines attributes which may be used as additional qualifiers against subjects, actions, actions, or in 
   conditions applied to policy.
-* `condition` - An OPTIONAL condition that specifies either a `rule` or `role` for which the policy applies.
+* `condition` - A condition specifies either a `rule` or `role` for which the policy applies.
 
 ### 4.1 Id Attribute
 
-* `id` - A policy `id` is a unique identifier string that allow individual policies to be referenced and potentially 
+* `id` - A unique identifier string (REQUIRED) that allows individual policies to be referenced and 
+  potentially 
   indicate purpose. An `id` MAY be a [GUID](https://en.wikipedia.org/wiki/Universally_unique_identifier) or 
   simply a unique textual identifier assigned by an administrator.
 
 ### 4.2 Meta Information
 
-The IDQL `meta` attribute is a top level policy object containing attributes for versioning and information 
-organization and versioning. All meta attributes are OPTIONAL.
+The `meta` attribute is a top level policy object containing attributes for versioning and information 
+organization. All meta attributes are OPTIONAL.
 
 ```yaml 
 idql-policies:
@@ -334,7 +352,7 @@ idql-policies:
 
 Versioning attributes include:
 * `date` - A modification date expressed in `DateTime` format. Value MUST be encoded as a valid `xsd:dateTime` 
-  as specified in Section 3.3.7 of XML XSD Definitions 
+  as specified in Section 3.3.7 of XML XSD Definitions .
   [[W3C XML Schema Definition Language(XSD) 1.1 Part2: Data Types]](http://www.w3.org/TR/xmlschema11-2/) 
   and MUST include both a date and a time. A `date` SHALL have no case sensitivity or uniqueness.
 * `vers` - A version identifier used to distinguish different policy versions (e.g. 1.0.1)
@@ -350,11 +368,10 @@ Informational attributes include:
 * `layer` - An OPTIONAL string identifier that may be used to group policy statements in a common container or 
   application layer.
 
-
 ### 4.3 Subject
 
-The `subject` indicates a method or Identity Provider to identify a security entity invoking a request.
-If subject is not present, the policy rule is applied to all requests, regardless of authentication 
+The `subject` object (OPTIONAL) defines an authetication state (e.g. anonymous) or Identity Provider to identify a 
+security entity invoking a request. If `subject` is not present, the policy rule is applied to all requests, regardless of authentication 
 status (e.g. HTTP authorization is ignored).
 ```yaml
 idql-policies:
@@ -369,7 +386,7 @@ idql-policies:
   objects:
     . . .
 ```
-A subject value is an object consisting of the following attributes:
+A `subject` is a JSON or YAML object consisting of the following attributes:
 * `subType` - A text value indicating the type of subject provider being referenced. Supported values include: 
   * `any` - Any subject whether authenticated or anonymous (this is the same is not specifying a subject)
   * `auth` - Any authenticated subject using any Identity Provider
@@ -384,13 +401,16 @@ A subject value is an object consisting of the following attributes:
     Used for access control for internal services.
   * `other` - A custom provider _[TODO: do we need this?]_
 
-When `subType` is one of: `basic`, `jwt`, `op`, `saml`, or `other`, the attribute `provId` specifies the identifier of an Identity 
-Provider configured as part of the policy project assets.
+When `subType` is one of: `basic`, `jwt`, `op`, `saml`, or `other`, the attribute `authId` specifies the identifier of 
+an Identity Provider configured as part of the policy project assets.
 > Discuss:  do we need `subType`?  Can be inferred by the use of provId vs other attributes like `cidr`.
 
 When `subType` is `net`, an attribute of `cidr` is used to specify an IP Address or network mask (CIDR).
 
 ### 4.4 Actions
+> THIS SECTION TO BE REVISED
+ 
+
 Actions describe the request operations that may be performed at a particular service Object. If no actions are 
 specified, it SHALL be assumed that the rule permits all actions. Actions can be logical (such as a scope) or a 
 filter that compares protocol, method, and path.
@@ -524,6 +544,8 @@ A condition consists of a `role` or a `rule` and an optional `action`:
 * `role` - Defines a role which the subject MUST possess for the `action` to be triggered. A role implies a set of
   permissions that provide the ability to execute the actions specified. Multiple role values MAY be specified using
   a comma separator. If mulitple roles are specified, ALL must be present.
+* `members` - An array of strings representing accounts or members that may be matched. A member is dependent on the 
+  target platform definition but often is a JWT Subject or a username or account name.
 * `rule` - A matching filter that uses a SCIM filter value as specified in Section
   [3.4.2.2 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.2). In addition to using SCIM 
   attribute names for User objects, each provider and object may define additional contextual (client ip, path, etc.) 
