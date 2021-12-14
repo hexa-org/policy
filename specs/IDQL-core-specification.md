@@ -34,14 +34,14 @@ This document is available for use under the APL 2.0 [Apache License](../LICENSE
 * [5.0 Evaluation Processing Rules](#50-evaluation-processing-rules)
 * [6.0 Deployment Lifecycle](#60-deployment-lifecycle)
 * [7.0 Appendix A - Use Cases](#70-appendix-a---use-cases)
-  * [Case 1 Role Policy](#case-1-role-policy)
+  * [7.1 General RBAC Policy Example](#71-general-rbac-policy-examples)
     * [Google Role Binding](#google-role-binding)
     * [AWS API Gateway Policy](#aws-api-gateway-policy)
     * [Azure App role](#azure-app-role)
 
 ---
 ## 1.0 Introduction
-IDQL or IDentity Query Language is a declarative policy language that can be expressed in either
+IDQL or Identity Query Language is a declarative policy language that can be expressed in either
 [YAML](https://yaml.org/spec/) 
 or [JSON (RFC8259)](https://datatracker.ietf.org/doc/html/rfc8259). IDQL is intended to be used to manage security 
 policy in distributed, hybrid [definition?], multi-cloud environments. The intent of IDQL is that all components, of a 
@@ -56,7 +56,8 @@ with an OPTIONAL set of `scopes` that MAY be used in a condition or returned to 
 IDQL policy MAY be expressed in YAML or JSON format.
 
 IDQL is intended to be used with an [IDQL Policy Gateway API] (the "Gateway") which enables retrieval of deployment 
-environments and the ability to retireve, update, and provision policy. The Gateway defines identifiers for the assets referred to in 
+environments and the ability to retrieve, update, and provision policy. The Gateway defines identifiers for the 
+assets referred to in 
 IDQL policy such as: 
 * `provId` - The identifier of an Identity Provider (e.g. "myGoogleIDP") that will provide the "subjects" referred to in 
   the policy.
@@ -405,6 +406,20 @@ When `subType` is one of: `basic`, `jwt`, `op`, `saml`, or `other`, the attribut
 an Identity Provider configured as part of the policy project assets.
 > Discuss:  do we need `subType`?  Can be inferred by the use of provId vs other attributes like `cidr`.
 
+#### 4.3.1 JWT Sub-type
+> Should this sectinon be in the providers configuration?
+
+For policy scenarios where the IDP is configured externally (e.g. using OIDC or OAuth2), a subject be defined simply 
+as a JWT Token with a set of configurable values and requirements.
+
+When `subType` is set to `jwt` the following attributes are defined:
+* `issuer` - A URIs representing the value of the issuer claim received in a JWT token to be accepted.
+* `aud` - A URI that must match one of the "aud" values in a JWT token.
+* `role_claims` - A list of claim attributes in a JWT that are to be used as `role` values for policy evaluation (e.
+  g. `["roles","scopes"]`.
+* `userid` - A JWT attribute to be used as the userid in policy (e.g. used in a condition members attribute).  By 
+  default `userid` is set to `sub`.
+
 When `subType` is `net`, an attribute of `cidr` is used to specify an IP Address or network mask (CIDR).
 
 ### 4.4 Actions
@@ -576,7 +591,9 @@ A condition consists of a `role` or a `rule` and an optional `action`:
 
 ## 7.0 Appendix A - Use Cases
 
-### Case 1 Role Policy
+### 7.1 General RBAC Policy Examples
+
+This case explores how each platform exposes RBAC.  Each policy system is slightly different.
 
 -----
 #### Google Role Binding
@@ -594,7 +611,9 @@ Permissions. When creating a custom role, you combine one or more IAM permission
 Role Documentation References:
 * [Basic and pre-defined roles](https://cloud.google.com/iam/docs/understanding-roles). These roles control basic 
   and administrative access to all Google services and products.
-* [Custom roles information](https://cloud.google.com/iam/docs/understanding-custom-roles) (i.e. application roles)
+* [Custom roles information](https://cloud.google.com/iam/docs/understanding-custom-roles). Note: custom roles 
+  simply let the administrator take groups of specific Google IAP Permissions and group them together.
+* The only role that can be used to grant access to applications is: `roles/iap.httpsResourceAccessor`.
 
 
 ```json
@@ -644,7 +663,7 @@ In IDQL, the Google GCP bind example becomes:
     "condition": {
       "members": [ "user:jie@example.com" ]
     }
-  }
+  },
   {
     "id": "Bind example to role with condition",
     "meta": {
@@ -808,6 +827,36 @@ IDQL equivalent...
       { "name":  "availableToOtherTenants", 
         "value": "false"}
     ]
+  }
+]}
+```
+
+### 7.2 General Access to Canary App
+
+This case attempts to explore a policy that would be implementable across all platforms for end-user access. Because 
+of limitations in GoogleIAP, an authenticated user is granted access by having the correct role for a given endpoint.
+Google IAP does not expose application level permissions (e.g. editor, creator, reviewer). The only role it exposes 
+for end-users is `roles/iap.httpsResourceAccessor`.
+
+The following IDQL Policy
+
+```json
+{ "idql-policies": [
+  {
+    "id": "Allow google IDP users access to Canary Bank",
+    "meta": {
+    },
+    "subject": {
+      "subType": "op",
+      "provId": "myGoogleIDP"
+    },
+    "actions": [
+      {
+        "name": "Role binding",
+        "actionUri" : "roles/resourcemanager.organizationAdmin"
+      }
+    ]
+   
   }
 ]}
 ```
