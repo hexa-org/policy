@@ -44,7 +44,7 @@
       "actions": [
         {
           "name": "editProfile",
-          "actionUri": "https:PUT|PATCH:/Profile/*"
+          "actionUri": "accountEdit"
         }
       ],
       "object": {

@@ -105,7 +105,7 @@ idql-policies:
       provId: myGoogleIDP
     actions:
       - name: editProfile
-        actionUri: https:PUT|PATCH:/Profile/*
+        actionUri: accountEdit
     object:
       assetId: CanaryProfileService
       pathSpec: "/Profile/*"
@@ -192,7 +192,7 @@ The JSON representation of the YAML policy above:
       "actions": [
         {
           "name": "editProfile",
-          "actionUri": "https:PUT|PATCH:/Profile/*"
+          "actionUri": "accountEdit"
         }
       ],
       "object": {
@@ -610,108 +610,79 @@ A condition consists of a `role` or a `rule` and an optional `action`:
 
 ### 7.1 General RBAC Policy Examples
 
-This case explores how each platform exposes RBAC.  Each policy system is slightly different.
+This use case will attempt to map the example given in the introduction to each platform.
 
 -----
 #### Google Role Binding
 
-In Google, a service has a set of "permissions". "Permissions" are exposed as "roles" that may be granted. Google 
-defines these as: Basic, Pre-Defined, and Custom roles.  A "permission" is like an IDQL action. For Google products 
-like Identity Access Proxy you cannot define new permissions such as an application role or permission like Canary 
-"EditProfile".  From the context of an application like Canary Bank, IAP just allows users through or not. To 
-enforce RBAC for Canary Bank, the application or another gateway must perform application RBAC.
-
-In Google Role Binding, roles are predefined. A custom role is simply a custom name for a set of Google defined 
-Permissions. When creating a custom role, you combine one or more IAM permissions in the form
-> `service.resource.verb`
-
-Role Documentation References:
-* [Basic and pre-defined roles](https://cloud.google.com/iam/docs/understanding-roles). These roles control basic 
-  and administrative access to all Google services and products.
-* [Custom roles information](https://cloud.google.com/iam/docs/understanding-custom-roles). Note: custom roles 
-  simply let the administrator take groups of specific Google IAP Permissions and group them together.
-* The only role that can be used to grant access to applications is: `roles/iap.httpsResourceAccessor`.
-
-
+Considering the example:
 ```json
 {
-  "bindings": [
+  "id": "EditProfileGoogleUpdate AdminContractor",
+  "meta": {
+    "vers": "0.1",
+    "date": "2021-08-01 21:32:44 UTC",
+    "disp": "Access policy enabling contract staff to edit profiles",
+    "app": "CanaryBank1",
+    "layer": "Browser"
+  },
+  "subject": {
+    "subType": "op",
+    "provId": "myGoogleIDP"
+  },
+  "actions": [
     {
-      "members": [
-        "user:jie@example.com"
-      ],
-      "role": "roles/resourcemanager.organizationAdmin"
-    },
-    {
-      "members": [
-        "user:raha@example.com",
-        "user:jie@example.com"
-      ],
-      "role": "roles/resourcemanager.projectCreator",
-      "condition": {
-        "title": "Expires July 1, 2022",
-        "description": "Expires on July 1, 2022",
-        "expression": "request.time < timestamp('2022-07-01T00:00:00.000Z')"
-      }
+      "name": "editProfile",
+      "actionUri": "accountEdit"
     }
   ],
-  "etag": "BwUjMhCsNvY=",
-  "version": 1
+  "object": {
+    "assetId": "CanaryProfileService",
+    "pathSpec": "/Profile/*"
+  },
+  "condition": {
+    "rule": "User:employeeType eq contract",
+    "action": "allow"
+  }
 }
 ```
 
-In IDQL, the Google GCP bind example becomes:
+In the assets data, it is assumed that the configuration information stores the following variables for the object
+CanaryProfileService`.
 ```json
-{ "idql-policies": [
-  {
-    "id": "Bind example to role part 1",
-    "meta": {
-    },
-    "subject": {
-      "subType": "op",
-      "provId": "myGoogleIDP"
-    },
-    "actions": [
-      {
-        "name": "Role binding",
-        "actionUri" : "roles/resourcemanager.organizationAdmin"
-      }
-    ],
-    "condition": {
-      "members": [ "user:jie@example.com" ]
-    }
-  },
-  {
-    "id": "Bind example to role with condition",
-    "meta": {
-    },
-    "subject": {
-      "subType": "op",
-      "provId": "myGoogleIDP"
-    },
-    "actions": [
-      {
-        "name": "Role binding",
-        "actionUri" : "roles/resourcemanager.projectCreator"
-      }
-    ],
-    "condition": {
-      "members": [ "user:raha@example.com", "user:jie@example.com" ],
-      "rule": "req.time lt 2022-07-01T00:00:00.000Z"
-    }
-  }
-]}
+{
+  "id": "CanaryProfileService",
+  "type": "GCP.compute",
+  "projectid": "xyz",
+  "region": "",
+  "resourceid": "55ec91ba47ba4f44adf0ef3b748e430f"
+}
 ```
 
-Issues:
-* Objects should probably come from the context of the Google Bind Policy endpoint.
+This policy to be applied would be:
+```json lines
+HTTP POST https://iap.googleapis.com/v1/projects/xyz/iap_web/compute/services/55ec91ba47ba4f44adf0ef3b748e430f
+:setIamPolicy
+{
+  "policy": {
+    "version": 3,
+    "bindings": [
+      {
+        "role": "roles/iap.httpsResourceAccessor",
+        "members": [
+          "domain:canarybank.io"
+        ],
+        "condition": {
+          "expression": "request.path.startsWith(\"/Profile\") && account.properties.employeeType == \"contractor\""
+        }
+      }
+    ]
+  }
+}
+```
 
-* When mapping across platforms, do we convert a single access policy into a bind plus resource policy (two policies)?
-* [Google Member prefixes](https://cloud.google.com/iam/docs/overview#cloud-iam-policy) are:
-  * user:
-  * serviceAccount:
-  * group:
-  * domain:
+> Note: It is not clear that the CEL expression "account.properties.employeeType" is possible with IAP.
+
    
 ----
 #### AWS API Gateway Policy
