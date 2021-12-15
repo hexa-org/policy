@@ -69,69 +69,80 @@ The following shows a policy that users from a provider known as "myGoogleIDP" o
 matching IP CIDR 192.168.0.1/24 may perform a `createProfile` or `editProfile` action against the target object 
 `CanaryProfileService`. When from "myGoogleIDP" The`editProfile` action also 
 requires that the User `employeeType` be equal to `contract`. 
-> Discussion: User:employeeType eq contract is essentially an implied role based on a condition of the user. This 
-> may be pre-assigned by the IDP, or be tested at the PDP. 
 
 The YAML representation of an example IDQL policy:
 ```yaml
 ---
 idql-policies:
-- id: CanaryProfileGoogleUpdate
-  meta:
-    vers: 0.1
-    date: 2021-08-01T21:32:44.882Z
-    disp: Access policy enabling profile update for Google users
-    app: CanaryBank1
-    layer: User
-  subject:
-    subType: op
-    provId: myGoogleIDP
-  actions:
-    - name: createProfile
-      actionUri: https:POST:/Users/
-  object:
-    assetId: CanaryProfileService
-    pathSpec: /Profile/*
-  condition:
-    role: canaryAccountCreator
-- id: EditProfileGoogleUpdate AdminContractor
-  meta:
-    vers: 0.1
-    date: 2021-08-01T21:32:44.882Z
-    disp: Access policy enabling profile update for Google users
-    app: CanaryBank1
-    layer: User
-  subject:
-    subType: op
-    provId: myGoogleIDP
-  actions:
-    - name: editProfile
-      actionUri: https:PUT|PATCH:/Users/*
-  object:
-    assetId: CanaryProfileService
-    pathSpec: /Profile/*
-  condition:
-    rule: User:employeeType eq contract
-    action: allow
-- id: CanaryProfileInternalNetUpdate
-  meta:
-    vers: 0.1
-    date: 2021-08-01T21:32:44.882Z
-    disp: Access policy enabling profile update for internal network clients
-    app: CanaryBank1
-    layer: Services
-  subject:
-    subType: net
-    cidr: 192.168.1.0/24
-  actions:
-  - name: createProfile
-    actionUri: https:POST:/Users/
-  - name: editProfile
-    actionUri: https:PUT|PATCH:/Users/*
-  object:
-    assetId: CanaryProfileService
-    pathSpec: /Profile/*   
+  - id: CanaryProfileGoogleUpdate
+    meta:
+      vers: '0.1'
+      date: 2021-08-01 21:32:44 UTC
+      disp: Access enabling user self service for users with role
+      app: CanaryBank1
+      layer: Browser
+    subject:
+      subType: op
+      provId: myGoogleIDP
+      role: canarySelfService
+    actions:
+      - name: createProfile
+        actionUri: accountCreate
+      - name: editProfile
+        actionUri: accountEdit
+    object:
+      assetId: CanaryProfileService
+      pathSpec: "/Profile/*"
+  - id: EditProfileGoogleUpdate AdminContractor
+    meta:
+      vers: '0.1'
+      date: 2021-08-01 21:32:44 UTC
+      disp: Access policy enabling contract staff to edit profiles
+      app: CanaryBank1
+      layer: Browser
+    subject:
+      subType: op
+      provId: myGoogleIDP
+    actions:
+      - name: editProfile
+        actionUri: https:PUT|PATCH:/Profile/*
+    object:
+      assetId: CanaryProfileService
+      pathSpec: "/Profile/*"
+    condition:
+      rule: User:employeeType eq contract
+      action: allow
+  - id: CanaryProfileInternalNetUpdate
+    meta:
+      vers: '0.1'
+      date: 2021-08-01 21:32:44 UTC
+      disp: Enabling profile update for internal network services
+      app: CanaryBank1
+      layer: Services
+    subject:
+      subType: net
+      cidr: 192.168.1.0/24
+      members:
+       - WorkFlowSvcAcnt
+    actions:
+      - name: createProfile
+        actionUri: accountCreate
+      - name: editProfile
+        actionUri: accountEdit
+    object:
+      assetId: CanaryProfileService
+      pathSpec: "/Profile/*"
 ```
+
+In the above example, 3 policies are defined:
+* The first policy allows users authenticated via a Google IDP with role "canarySelfService" to invoke the actions 
+  "createProfile" and "editProfile" on the "CanaryProfileService" asset. In this case, the role would likely be 
+  asserted in a JWT assertion.
+* In the second policy, contract employees of CanaryBank identified by the condition `User:employeeType eq contract` 
+  are permitted to invoke the editProfile action of the "CanaryProfileService". The condition implies the policy 
+  decision point is able to access local SCIM, LDAP, or database containing User information.  
+* The third policy enables internal services to perform actions and are authorized by IP subnet and a service 
+  account "WorkFlowSvcAcnt".
 
 The JSON representation of the YAML policy above:
 ```json lines
@@ -142,26 +153,27 @@ The JSON representation of the YAML policy above:
       "meta": {
         "vers": "0.1",
         "date": "2021-08-01 21:32:44 UTC",
-        "disp": "Access policy enabling profile update for Google users",
+        "disp": "Access enabling user self service for users with role",
         "app": "CanaryBank1",
-        "layer": "User"
+        "layer": "Browser"
       },
       "subject": {
         "subType": "op",
-        "provId": "myGoogleIDP"
+        "provId": "myGoogleIDP",
+        "role": "canarySelfService"
       },
       "actions": [
         {
           "name": "createProfile",
-          "actionUri": "https:POST:/Users/"
+          "actionUri": "accountCreate"
+        },
+        { "name": "editProfile",
+          "actionUri": "accountEdit"
         }
       ],
       "object": {
         "assetId": "CanaryProfileService",
         "pathSpec": "/Profile/*"
-      },
-      "condition" : {
-        "role": "canaryAccountCreator"
       }
     },
     {
@@ -169,9 +181,9 @@ The JSON representation of the YAML policy above:
       "meta": {
         "vers": "0.1",
         "date": "2021-08-01 21:32:44 UTC",
-        "disp": "Access policy enabling profile update for Google users",
+        "disp": "Access policy enabling contract staff to edit profiles",
         "app": "CanaryBank1",
-        "layer": "User"
+        "layer": "Browser"
       },
       "subject": {
         "subType": "op",
@@ -180,7 +192,7 @@ The JSON representation of the YAML policy above:
       "actions": [
         {
           "name": "editProfile",
-          "actionUri": "https:PUT|PATCH:/Users/*"
+          "actionUri": "https:PUT|PATCH:/Profile/*"
         }
       ],
       "object": {
@@ -197,22 +209,22 @@ The JSON representation of the YAML policy above:
       "meta": {
         "vers": "0.1",
         "date": "2021-08-01 21:32:44 UTC",
-        "disp": "Access policy enabling profile update for internal network clients",
+        "disp": "Enabling profile update for internal network services",
         "app": "CanaryBank1",
         "layer": "Services"
       },
       "subject": {
         "subType": "net",
-        "cidr": "192.168.1.0/24"
+        "cidr": "192.168.1.0/24",
+        "members": ["WorkFlowSvcAcnt"]
       },
       "actions": [
         {
           "name": "createProfile",
-          "actionUri": "https:POST:/Users/"
+          "actionUri": "accountCreate"
         },
-        {
-          "name": "editProfile",
-          "actionUri": "https:PUT|PATCH:/Users/*"
+        { "name": "editProfile",
+          "actionUri": "accountEdit"
         }
       ],
       "object": {
@@ -253,7 +265,7 @@ data upon which IDQL
 rules operate. The Policy Gateway provides the following objects
 * _Identity Providers_ define `authId` identifiers are used in a `subject` clause in IDQL. Each provider SHOULD 
   have a set of claims which may be used in policy conditions. Where possible, claims from Identity Providers
-  should be mapped to claims defined by 
+  should be mapped to definitions from: 
   * [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.
     html#Claims). 
   * And, for extended User profile attributes, use 
@@ -264,7 +276,7 @@ rules operate. The Policy Gateway provides the following objects
  
 In practice, a Policy Gateway maps IDQL Policy to each platform and its native policy system.
 In different cloud native environments, policy decision and enforcement may occur using different models. Policy 
-deployment, processing (deicisons) and enforcement may be local to the asset (e.g. using the 
+deployment, processing and enforcement may be local to the asset (e.g. using the 
 [Open Poilicy Agent sidecar pattern](https://www.openpolicyagent.org/docs/latest/integration/#comparison)), 
 delivered through a shared service Policy Decision Point (PDP), or handled directly through a platform's administrative 
 interfaces, or other method. As a declarative policy system, it is assumed that the policy administrative gateway 
@@ -364,14 +376,14 @@ Versioning attributes include:
   (administrative system).
 
 Informational attributes include:
-* `app` - An OPTIONAL string identifier that may be used to group policy statments pertaining to a common application.
+* `app` - An OPTIONAL string identifier that may be used to group policy statements pertaining to a common application.
 * `disp` - An OPTIONAL string containing a description of the intent of the policy.
 * `layer` - An OPTIONAL string identifier that may be used to group policy statements in a common container or 
   application layer.
 
 ### 4.3 Subject
 
-The `subject` object (OPTIONAL) defines an authetication state (e.g. anonymous) or Identity Provider to identify a 
+The `subject` object (OPTIONAL) defines an authentication state (e.g. anonymous) or Identity Provider to identify a 
 security entity invoking a request. If `subject` is not present, the policy rule is applied to all requests, regardless of authentication 
 status (e.g. HTTP authorization is ignored).
 ```yaml
@@ -382,6 +394,7 @@ idql-policies:
   subject:
     subType: idp
     provId: myGoogleIDP
+    role: goldService
   actions:
     . . .
   objects:
@@ -397,17 +410,25 @@ A `subject` is a JSON or YAML object consisting of the following attributes:
     Server (RFC6749)](https://datatracker.ietf.org/doc/html/rfc6749).
   * `op` - A subject authenticated with a JWT token issued by an [OpenID Provider](https://openid.net).
   * `saml` - A subject authenticated with an XML SAML assertion using a SAML IDP.
-  * `net` - A subject identified by the client requestor's network address expressed as an IP address or 
+  * `net` - A subject identified by the requesting client's network address expressed as an IP address or 
     [CIDR (RFC1817)](https://datatracker.ietf.org/doc/html/rfc1817) value. 
     Used for access control for internal services.
   * `other` - A custom provider _[TODO: do we need this?]_
+* `role` - Defines a role which the subject MUST possess for a rule to apply. A role implies a set of
+  actions (i.e. permissions) that provide the ability to execute the actions specified. Multiple role values MAY be 
+  specified using a comma separator. When multiple roles are specified, all values must be asserted (treated as an 
+  AND).
+* `members` - An array of strings representing service account, user, or group that may be matched. A member is 
+  dependent on the target platform definition but often is a JWT Subject or a username or account name. If group is 
+  specified, the group must be part of the inbound JWT assertion or be defined locally (e.g. in SCIM or database 
+  service).
 
 When `subType` is one of: `basic`, `jwt`, `op`, `saml`, or `other`, the attribute `authId` specifies the identifier of 
 an Identity Provider configured as part of the policy project assets.
 > Discuss:  do we need `subType`?  Can be inferred by the use of provId vs other attributes like `cidr`.
 
 #### 4.3.1 JWT Sub-type
-> Should this sectinon be in the providers configuration?
+> Should this section be in the provider's configuration?
 
 For policy scenarios where the IDP is configured externally (e.g. using OIDC or OAuth2), a subject be defined simply 
 as a JWT Token with a set of configurable values and requirements.
@@ -415,8 +436,8 @@ as a JWT Token with a set of configurable values and requirements.
 When `subType` is set to `jwt` the following attributes are defined:
 * `issuer` - A URIs representing the value of the issuer claim received in a JWT token to be accepted.
 * `aud` - A URI that must match one of the "aud" values in a JWT token.
-* `role_claims` - A list of claim attributes in a JWT that are to be used as `role` values for policy evaluation (e.
-  g. `["roles","scopes"]`.
+* `role_claims` - A list of claim attributes in a JWT that are to be used as `role` values for policy evaluation 
+   (e.g. `["roles","scopes"]`).
 * `userid` - A JWT attribute to be used as the userid in policy (e.g. used in a condition members attribute).  By 
   default `userid` is set to `sub`.
 
@@ -455,7 +476,7 @@ An action consists of the following attributes:
   * `<domain>` - Is the defining domain for the action. E.g. `ietf`, `arn`, `gcp`, `azure`. For `aws`, use the AWS
     `arn` format. For `ietf` protocols the
     following apply:
-    * `<protocol>` - Is the applicaiton protocol (e.g. FTP, HTTP, IMAP)
+    * `<protocol>` - Is the application protocol (e.g. FTP, HTTP, IMAP)
     * `<method>` - An associated method if any. Multiple methods may be specified using the `|` (e.g. PUT|PATCH).
     * `<pathSpec>` - A URI file path which MAY include a wildcard (`*`). For example: `/Users/*`.
 * `exclude` - When set to true, the action MAY be used to invert the action. For example, everything is permitted 
@@ -556,11 +577,7 @@ idql-policies:
 ```
 
 A condition consists of a `role` or a `rule` and an optional `action`:
-* `role` - Defines a role which the subject MUST possess for the `action` to be triggered. A role implies a set of
-  permissions that provide the ability to execute the actions specified. Multiple role values MAY be specified using
-  a comma separator. If mulitple roles are specified, ALL must be present.
-* `members` - An array of strings representing accounts or members that may be matched. A member is dependent on the 
-  target platform definition but often is a JWT Subject or a username or account name.
+
 * `rule` - A matching filter that uses a SCIM filter value as specified in Section
   [3.4.2.2 of RFC7644](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.2). In addition to using SCIM 
   attribute names for User objects, each provider and object may define additional contextual (client ip, path, etc.) 
@@ -580,7 +597,7 @@ A condition consists of a `role` or a `rule` and an optional `action`:
 >
 >What happens when multiple values are provided for subjects/actions/objects?
 >
->In the absense of matches deny is always the default.
+>In the absence of matches deny is always the default.
 >
 >Deny always supersedes Allow.  With no permissive rule, deny is the default response.
 

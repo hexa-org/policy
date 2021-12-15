@@ -54,6 +54,17 @@
                 "enum": ["any","auth","basic","jwt","op","saml","net","other"],
                 "description": "The subject type which is one of any|basic|jwt|idp|ref|net|other"
               },
+              "role": {
+                "type": "string",
+                "description": "A role implies a set of permissions that provide the ability to execute the actions specified in 'actions'."
+              },
+              "members": {
+                "type": "array",
+                "description": "",
+                "items": {
+                  "type": "string"
+                }
+              },
               "allOf": [
                 {
                   "$comment": "This validates type subject type 'basic'.",
@@ -235,17 +246,6 @@
               "rule": {
                 "type": "string",
                 "description": "Logic the constrains a request based on attributes about the context of the request(origin, target resource). Conditions are expressed as a filter defining a matching condition based on RFC7644 Sec 3.4.2.2"
-              },
-              "role": {
-                "type": "string",
-                "description": "A role implies a set of permissions that provide the ability to execute the actions specified in 'actions'."
-              },
-              "members": {
-                "type": "array",
-                "description": "",
-                "items": {
-                  "type": "string"
-                }
               },
               "action": {
                 "enum": [

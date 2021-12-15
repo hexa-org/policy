@@ -3,10 +3,10 @@
   <component name="JsonSchemaMappingsProjectConfiguration">
     <state>
       <map>
-        <entry key="idql-policy">
+        <entry key="IDQL-core">
           <value>
             <SchemaInfo>
-              <option name="name" value="idql-policy" />
+              <option name="name" value="IDQL-core" />
               <option name="relativePathToSchema" value="schema/idql-policy.schema.json" />
               <option name="patterns">
                 <list>
@@ -14,9 +14,6 @@
                     <option name="directory" value="true" />
                     <option name="path" value="examples" />
                     <option name="mappingKind" value="Directory" />
-                  </Item>
-                  <Item>
-                    <option name="path" value="examples/idql-example.json" />
                   </Item>
                 </list>
               </option>

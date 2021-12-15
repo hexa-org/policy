@@ -5,26 +5,27 @@
       "meta": {
         "vers": "0.1",
         "date": "2021-08-01 21:32:44 UTC",
-        "disp": "Access policy enabling profile update for Google users",
+        "disp": "Access enabling user self service for users with role",
         "app": "CanaryBank1",
-        "layer": "User"
+        "layer": "Browser"
       },
       "subject": {
         "subType": "op",
-        "provId": "myGoogleIDP"
+        "provId": "myGoogleIDP",
+        "role": "canarySelfService"
       },
       "actions": [
         {
           "name": "createProfile",
-          "actionUri": "https:POST:/Users/"
+          "actionUri": "accountCreate"
+        },
+        { "name": "editProfile",
+          "actionUri": "accountEdit"
         }
       ],
       "object": {
         "assetId": "CanaryProfileService",
         "pathSpec": "/Profile/*"
-      },
-      "condition": {
-        "role": "canaryAccountCreator"
       }
     },
     {
@@ -32,9 +33,9 @@
       "meta": {
         "vers": "0.1",
         "date": "2021-08-01 21:32:44 UTC",
-        "disp": "Access policy enabling profile update for Google users",
+        "disp": "Access policy enabling contract staff to edit profiles",
         "app": "CanaryBank1",
-        "layer": "User"
+        "layer": "Browser"
       },
       "subject": {
         "subType": "op",
@@ -43,7 +44,7 @@
       "actions": [
         {
           "name": "editProfile",
-          "actionUri": "https:PUT|PATCH:/Users/*"
+          "actionUri": "https:PUT|PATCH:/Profile/*"
         }
       ],
       "object": {
@@ -60,22 +61,22 @@
       "meta": {
         "vers": "0.1",
         "date": "2021-08-01 21:32:44 UTC",
-        "disp": "Access policy enabling profile update for internal network clients",
+        "disp": "Enabling profile update for internal network services",
         "app": "CanaryBank1",
         "layer": "Services"
       },
       "subject": {
         "subType": "net",
-        "cidr": "192.168.1.0/24"
+        "cidr": "192.168.1.0/24",
+        "members": ["WorkFlowSvcAcnt"]
       },
       "actions": [
         {
           "name": "createProfile",
-          "actionUri": "https:POST:/Users/"
+          "actionUri": "accountCreate"
         },
-        {
-          "name": "editProfile",
-          "actionUri": "https:PUT|PATCH:/Users/*"
+        { "name": "editProfile",
+          "actionUri": "accountEdit"
         }
       ],
       "object": {
