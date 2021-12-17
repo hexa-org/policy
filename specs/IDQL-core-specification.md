@@ -35,9 +35,9 @@ This document is available for use under the APL 2.0 [Apache License](../LICENSE
 * [6.0 Deployment Lifecycle](#60-deployment-lifecycle)
 * [7.0 Appendix A - Use Cases](#70-appendix-a---use-cases)
   * [7.1 General RBAC Policy Example](#71-general-rbac-policy-examples)
-    * [Google Role Binding](#google-role-binding)
-    * [AWS API Gateway Policy](#aws-api-gateway-policy)
-    * [Azure App role](#azure-app-role)
+    * [7.1.1 Google {Policy](#711-google-policy)
+    * [7.1.2 AWS API Policy](#712-aws-api-policy)
+    * [7.1.3 Azure App role](#713-azure-app-role)
 
 ---
 ## 1.0 Introduction
@@ -613,7 +613,7 @@ A condition consists of a `role` or a `rule` and an optional `action`:
 This use case will attempt to map the example given in the introduction to each platform.
 
 -----
-#### Google Role Binding
+#### 7.1.1 Google Policy
 
 Considering the example:
 ```json
@@ -659,7 +659,7 @@ CanaryProfileService`.
 }
 ```
 
-This policy to be applied would be:
+The policy to be applied would be:
 ```json lines
 HTTP POST https://iap.googleapis.com/v1/projects/xyz/iap_web/compute/services/55ec91ba47ba4f44adf0ef3b748e430f
 :setIamPolicy
@@ -685,91 +685,77 @@ HTTP POST https://iap.googleapis.com/v1/projects/xyz/iap_web/compute/services/55
 
    
 ----
-#### AWS API Gateway Policy
+#### 7.1.2 AWS API Policy
 
-A resource policy may be attached to an 
-[API Gateway](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-control-access-policy-language-overview.html).  Example policy...
+Following the same IDQL example in the Google example (Section 7.1.1). The asset information might look like:
+In the assets data, it is assumed that the configuration information stores the following variables for the object
+CanaryProfileService`.
 ```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Principal": "*",
-            "Action": "execute-api:Invoke",
-            "Resource": "arn:aws:execute-api:region:account-id:*"
-        },
-        {
-            "Effect": "Deny",
-            "Principal": "*",
-            "Action": "execute-api:Invoke",
-            "Resource": "arn:aws:execute-api:region:account-id:*",
-            "Condition": {
-                "NotIpAddress": {
-                    "aws:SourceIp": "123.4.5.6/24"
-                }
-            }
-        }
-    ]
+  "id": "CanaryProfileService",
+  "type": "aws",
+  "account-id": "xyz",
+  "api-id": "a1234567890",
+  "region": "us-east-1",
+  "stage-name": "",
+  "http-verb": "",
+  "resoource-path-specifier": "/Profile/*"
 }
 ```
 
-In this example, an IDQL equivalent might be:
+Likewise, the subject provider `myGoogleIdp` maps back to a federated OIDC provider whose URI is:  `idp.canarybank.io`.
+
+An AWS resource is typically defined by:
+
+`arn:aws:execute-api:region:account-id:api-id/stage-name/HTTP-VERB/resource-path-specifier`
+
+A resource policy may be attached to an 
+[API Gateway](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-control-access-policy-language
+-overview.html).  Also see 
+[API Gateway ARM Reference](https://docs.aws.amazon.com/apigateway/latest/developerguide/arn-format-reference.html).
 
 ```json
-{ "idql-policies": [
-  {
-    "id": "anon-execute-api-invoke",
-    "meta": {
-      "vers": "2012-10-17"
-    },
-    "subject": {
-      "subType": "any"
-    },
-    "actions": [
-      {
-        "actionUri": "execute-api:Invoke"
-      }      
-    ],
-    "object": {
-      "assetId": "myAwsAPIGateway",
-      "pathSpec": "arn:aws:execute-api:region:account-id:*"
-    }
-  },
-  {
-    "id": "block-anon-execute-api-invoke",
-    "meta": {
-      "vers": "2012-10-17"
-    },
-    "subject": {
-      "subType": "net",
-      "cidr": "123.4.5.6/24"
-    },
-    "actions": [
-      {
-        "actionUri": "execute-api:Invoke"
-      }
-    ],
-    "object": {
-      "assetId": "myAwsAPIGateway",
-      "pathSpec": "arn:aws:execute-api:region:account-id:*"
-    },
-    "condition": {
-      "action": "deny"
-    }
-  }
-]}
+{
+    "Version": "0.1",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+              "Federated": "idp.canarybank.io"
+            },
+            "Action": "execute-api:Invoke",
+            "Resource": "arn:aws:execute-api:us-east-1:xyz:a1234567890/*/*/Profile/*"
+        }]
+}
 ```
-
-Note: the above could be done as one IDQL rule where the condition is: `req.ip ne "123.4.5.6/24"`
+> TODO: This policy does not implement the condition employeeType eq contractor.
 
 ----
-#### Azure App role
+#### 7.1.3 Azure App Role
 
+Following the same IDQL example in the Google example (Section 7.1.1). The asset information might look like:
+In the assets data, it is assumed that the configuration information stores the following variables for the object
+CanaryProfileService`.
+```json
+{
+  "id": "CanaryProfileService",
+  "type": "azure.waf",
+  "subscription": "s1234567890",
+  "resourceGroup": "xyz",
+  "api-id": "8763f1c4-0000-0000-0000-158e9ef97d6a",
+  "location": "us-east-1",
+  "stage-name": "",
+  "resoource": "/Profile/*"
+}
+```
 In Azure, users and groups are assigned roles in the directory using Graph.  You then can add User or Application roles 
-to an application. 
+to an application. The azure case is unclear for a federated provider. 
 
-The following policy assigns a User role to an application.
+The following policy assigns a role to an application.  When the User is authenticated, the roles claim must include 
+the value `accountEdit`.
+
+> TODO: It is unclear how Azure would enforce the employeeType eq contractor. Presumably this is done in the AD 
+> graph rather than handled dynamically.
 
 ```json
 "appId": "8763f1c4-0000-0000-0000-158e9ef97d6a",
@@ -778,73 +764,12 @@ The following policy assigns a User role to an application.
       "allowedMemberTypes": [
         "User"
       ],
-      "displayName": "Writer",
+      "displayName": "editProfile",
       "id": "d1c2ade8-0000-0000-0000-6d06b947c66f",
       "isEnabled": true,
-      "description": "Writers Have the ability to create tasks.",
-      "value": "Writer"
+      "description": "Access policy enabling contract staff to edit profiles",
+      "value": "accountEdit"
     }
   ],
 "availableToOtherTenants": false,
-```
-
-IDQL equivalent...
-```json
-{ "idql-policies": [
-  {
-    "id": "d1c2ade8-0000-0000-0000-6d06b947c66f",
-    "meta": {
-      "disp": "Writer",
-      "app": "8763f1c4-0000-0000-0000-158e9ef97d6a",
-      "vers": "2012-10-17"
-    },
-    "subject": {
-      "subType": "auth"
-    },
-    "actions": [
-      {
-        "actionUri": "Writer"
-      }      
-    ],
-    "object": {
-      "assetId": "8763f1c4-0000-0000-0000-158e9ef97d6a"
-    },
-    "scopes": [
-      { "name": "allowedMemberTypes",
-        "value": "User"},
-      { "name":  "availableToOtherTenants", 
-        "value": "false"}
-    ]
-  }
-]}
-```
-
-### 7.2 General Access to Canary App
-
-This case attempts to explore a policy that would be implementable across all platforms for end-user access. Because 
-of limitations in GoogleIAP, an authenticated user is granted access by having the correct role for a given endpoint.
-Google IAP does not expose application level permissions (e.g. editor, creator, reviewer). The only role it exposes 
-for end-users is `roles/iap.httpsResourceAccessor`.
-
-The following IDQL Policy
-
-```json
-{ "idql-policies": [
-  {
-    "id": "Allow google IDP users access to Canary Bank",
-    "meta": {
-    },
-    "subject": {
-      "subType": "op",
-      "provId": "myGoogleIDP"
-    },
-    "actions": [
-      {
-        "name": "Role binding",
-        "actionUri" : "roles/resourcemanager.organizationAdmin"
-      }
-    ]
-   
-  }
-]}
 ```
