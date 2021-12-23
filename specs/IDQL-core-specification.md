@@ -16,28 +16,34 @@ Copyright (C) 2021, Strata Identity Inc. All rights reserved.
 
 This document is available for use under the APL 2.0 [Apache License](../LICENSE).
 
-## Table of Contents
+Table of Contents
+=================
 
-* [1.0 Introduction](#10-introduction)
-* [2.0 YAML and JSON Schema and Media Types](#20-yaml-and-json-schema-and-media-types)
-* [3.0 Policy Environment](#30-policy-environment)
-  * [3.1 Project Context](#31-project-context)
-  * [3.2 Contextual Attributes](#32-contextual-attributes)
-* [4.0 IDQL Policy Statements](#40-idql-policy-statements)
-  * [4.1 Id Attribute](#41-id-attribute)
-  * [4.2 Meta Information](#42-meta-information)
-  * [4.3 Subject](#43-subject)
-  * [4.4 Actions](#44-actions)
-  * [4.5 Object](#45-object)
-  * [4.6 Scopes](#46-scopes)
-  * [4.7 Condition](#47-condition)
-* [5.0 Evaluation Processing Rules](#50-evaluation-processing-rules)
-* [6.0 Deployment Lifecycle](#60-deployment-lifecycle)
-* [7.0 Appendix A - Use Cases](#70-appendix-a---use-cases)
-  * [7.1 General RBAC Policy Example](#71-general-rbac-policy-examples)
-    * [7.1.1 Google {Policy](#711-google-policy)
-    * [7.1.2 AWS API Policy](#712-aws-api-policy)
-    * [7.1.3 Azure App role](#713-azure-app-role)
+  * [1.0 Introduction](#10-introduction)
+  * [2.0 YAML and JSON Schema and Media Types](#20-yaml-and-json-schema-and-media-types)
+  * [3.0 Policy Environment](#30-policy-environment)
+    * [3.1 Project Context](#31-project-context)
+    * [3.2 How Policy Is Deployed](#32-how-policy-is-deployed)
+    * [3.3 Contextual Attributes](#33-contextual-attributes)
+  * [4.0 IDQL Policy Statements](#40-idql-policy-statements)
+    * [4.1 Id Attribute](#41-id-attribute)
+    * [4.2 Meta Information](#42-meta-information)
+    * [4.3 Subject](#43-subject)
+      * [4.3.1 JWT Sub-type](#431-jwt-sub-type)
+    * [4.4 Actions](#44-actions)
+      * [4.4.1 IETF Domain URNs](#441-ietf-domain-urns)
+      * [4.4.2 Amazon ARN Actions](#442-amazon-arn-actions)
+      * [4.4.3 Microsoft Azure URNs for Actions](#443-microsoft-azure-urns-for-actions)
+      * [4.4.4 Google URNs for Actions](#444-google-urns-for-actions)
+    * [4.5 Object](#45-object)
+    * [4.6 Scopes](#46-scopes)
+    * [4.7 Condition](#47-condition)
+  * [5.0 Appendix A - Use Cases](#50-appendix-a---use-cases)
+    * [5.1 General RBAC Policy Examples](#51-general-rbac-policy-examples)
+      * [5.1.1 Google Policy](#511-google-policy)
+      * [5.1.2 AWS API Policy](#512-aws-api-policy)
+      * [5.1.3 Azure App Role](#513-azure-app-role)
+
 
 ---
 ## 1.0 Introduction
@@ -253,8 +259,9 @@ and 4.2.5 of RFC6838.
 ---
 ## 3.0 Policy Environment
 
-In order to define policy, IDQL assumes a pre-defined set of assets where policy will be deployed and a set of 
-Identity Providers that will constitute the subjects against which policy decisions are made. In addition to project 
+In order to define policy, IDQL assumes a pre-defined set of assets where policy will be deployed which are 
+identified by an identifier. Similarly, IDQL assumes a set of 
+Identity Providers that define the subjects against which policy decisions are made. In addition to project 
 information, policy conditions MAY use contextual attributes to apply conditions against run time request information.
 
 ### 3.1 Project Context
@@ -270,11 +277,13 @@ rules operate. The Policy Gateway provides the following objects
     html#Claims). 
   * And, for extended User profile attributes, use 
     [SCIM User schema under IANA](https://www.iana.org/assignments/scim/scim.xhtml).
-* _Assets_ identified by `assetId` are platforms, components, and services where policy is being applied. 
-  Typically, an asset has a pre-defied set of permissible `actions` that MAY be allowed, denied, and/or scoped in an 
-  IDQL policy rule. 
- 
-In practice, a Policy Gateway maps IDQL Policy to each platform and its native policy system.
+* _Assets_ are referred to in IDQL policy as part of the `object` attribute. An asset represents on object where 
+  policy may be applied. An asset often has a pre-defied set of permissible `actions` (e.g. roles or permissions) that 
+  MAY be allowed, denied, and/or scoped in within an IDQL policy rule. 
+
+### 3.2 How Policy Is Deployed
+
+In practice, a Policy Gateway system maps IDQL Policy to each platform and its native policy system.
 In different cloud native environments, policy decision and enforcement may occur using different models. Policy 
 deployment, processing and enforcement may be local to the asset (e.g. using the 
 [Open Poilicy Agent sidecar pattern](https://www.openpolicyagent.org/docs/latest/integration/#comparison)), 
@@ -282,7 +291,59 @@ delivered through a shared service Policy Decision Point (PDP), or handled direc
 interfaces, or other method. As a declarative policy system, it is assumed that the policy administrative gateway 
 services for IDQL will handle delivery and configuration with the defined policy assets.
 
-### 3.2 Contextual Attributes
+#### 3.2.1 Typical Asset Descriptors
+A typical asset has attributes such as project id, data center region and other items required by platform vendors 
+(such as AWS, Azure, GCP, or other).  For example:
+
+For AWS, the server information needed to identify an asset might include:
+```json
+{
+  "id": "CanaryProfileService",
+  "type": "aws",
+  "account-id": "xyz",
+  "api-id": "a1234567890",
+  "region": "us-east-1",
+  "stage-name": "",
+  "http-verb": "",
+  "resoource-path-specifier": "/Profile/*"
+}
+```
+
+For Azure, configuration information includes:
+```json
+{
+  "id": "CanaryProfileService",
+  "type": "azure.waf",
+  "subscription": "s1234567890",
+  "resourceGroup": "xyz",
+  "api-id": "8763f1c4-0000-0000-0000-158e9ef97d6a",
+  "location": "us-east-1",
+  "stage-name": "",
+  "resoource": "/Profile/*"
+}
+```
+
+For GCP, configruation information could include:
+```json
+{
+  "id": "CanaryProfileService",
+  "type": "GCP.compute",
+  "projectid": "xyz",
+  "region": "",
+  "resourceid": "55ec91ba47ba4f44adf0ef3b748e430f"
+}
+```
+
+In practice, a Policy Gateway will also need to be configured with an appropriate 
+administrative credential (not shown) to make changes.
+
+In the above example asset descriptors note that each JSON structure has a "type" attribute. A 
+policy gateway and policy editor will use `type` to look up asset schema using [JSON Schema](https://json-schema.org) or [JSON-LD](https://json-ld.org).
+
+> Question: Do we need both JSON-Schema and JSON-LD?  Both are self-describing, however JSON Schema does provide 
+> attribute combination rules whereas JSON-LD simply describes simple objects and attributes.
+
+### 3.3 Contextual Attributes
 
 When a policy rule is tested, certain run-time contextual information is made available for IDQL `conditions`.
 
@@ -444,11 +505,9 @@ When `subType` is set to `jwt` the following attributes are defined:
 When `subType` is `net`, an attribute of `cidr` is used to specify an IP Address or network mask (CIDR).
 
 ### 4.4 Actions
-> THIS SECTION TO BE REVISED
- 
 
-Actions describe the request operations that may be performed at a particular service Object. If no actions are 
-specified, it SHALL be assumed that the rule permits all actions. Actions can be logical (such as a scope) or a 
+Actions describe the requests, scopes, or permissions that may be performed at a particular service Object. If no 
+actions are specified, it SHALL be assumed that the rule permits all actions. Actions can be logical (such as a scope) or a 
 filter that compares protocol, method, and path.
 
 ```yaml
@@ -462,7 +521,7 @@ idql-policies:
   - name: createProfile
     actionUri: https:POST:/Users/
   - name: editProfile
-    actionUri: https:PUT|PATCH:/Users/*
+    actionUri: ietf:https:PUT|PATCH:/Users/*
     condition:
       rule: adminType eq admincontractor
   objects:
@@ -472,20 +531,85 @@ idql-policies:
 
 An action consists of the following attributes:
 * `name` - An OPTIONAL unique identifier for an action.
-* `actionUri` - A URI of the form `<domain>:<protocol>:<method>:<pathSpec>?<param-qual>` where
-  * `<domain>` - Is the defining domain for the action. E.g. `ietf`, `arn`, `gcp`, `azure`. For `aws`, use the AWS
-    `arn` format. For `ietf` protocols the
-    following apply:
-    * `<protocol>` - Is the application protocol (e.g. FTP, HTTP, IMAP)
-    * `<method>` - An associated method if any. Multiple methods may be specified using the `|` (e.g. PUT|PATCH).
-    * `<pathSpec>` - A URI file path which MAY include a wildcard (`*`). For example: `/Users/*`.
-* `exclude` - When set to true, the action MAY be used to invert the action. For example, everything is permitted 
+* `actionUri` - A URI of the form `<domain-urn>:<domain-uri>` where
+  * `<domain-urn>` - Is the defining domain for the action. E.g. `ietf`, `arn`, `gcp`, `azure`. For `aws`, use the AWS
+    `arn` format. 
+  * `<domain-uri>` - Is the domain specific formatted portion of the URI. For example, `arn` denotes Amazon Resource 
+    Name and `ietf` denotes IETF based protocols (see below).
+* `exclude` - When set to true, the action MAY be used to invert the action. For example, everything is permitted
   except for `https:PUT|PATCH|DELETE:/*`
 
-URIs and paths may contain wildcards (`*`) and may contain
+URIs including paths may contain wildcards (`*`) and may contain
 variables denoted by `${<variable>}` where <variable> is the variable name (e.g. calculated by a scope).
 
->TODO: Should we have multiple URI types specified?  E.g.  actions that match to roles?
+#### 4.4.1 IETF Domain URNs
+
+For IETF protocols, the `<domain-urn>` IDQL prefix is `ietf:`. The `<domain-uri>` is formatted:
+> `ietf:<protocol>:<method>:<pathSpec>?<query>`
+
+The IETF domain is defined with:
+
+  * `<protocol>` - Is the application protocol (e.g. FTP, HTTP, IMAP)
+  * `<method>` - An associated request method (e.g. GET). Multiple methods may be specified using the `|` 
+    (e.g. PUT|PATCH). A value of `*` indicates all methods.
+  * `<pathSpec>` - A URI file path (per RFC3986 [Section 3.3](https://www.rfc-editor.org/rfc/rfc3986#section-3.3)) 
+    which MAY include a wildcard (`*`). For example: 
+    `/Users/*`.
+  * `<query>` - The request query component (per RFC3986 
+[Section 3.4](https://www.rfc-editor.org/rfc/rfc3986#section-3.4)).
+  
+#### 4.4.2 Amazon ARN Actions
+
+The `<domain-arn>` IDQL prefix for Amazon is `arn:` which designates an Amazon Resource Name and follows AWS's [ARN 
+format](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html).
+Typically, AWS uses ARNs to refer to resources, sessions, or identities. In the context of an IDQL Action, an [AWS 
+Action](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_action.html) MAY be used combined with the `arn:` prefix. So for example, the action `ec2:StartInstances` becomes 
+`arn:ec2:StartInstances`. In most cases, AWS actions will be formatted:
+> `arn:<product>:<action>`
+
+Example actions:
+
+| Type | Example |
+|--- | ---|
+| EC2 | `arn:ec2:StartInstances`|
+| IAM | `arn:iam:ChangePassword`|
+| S3 | `arn:s3:GetObject` |
+
+As specified above, wildcards MAY be used. For example: `arn:s3:*` allows any action on an S3 object.
+
+#### 4.4.3 Microsoft Azure URNs for Actions
+
+The `<domain-arn>` prefix in IDQL for Microsoft Azure actions is `azure:`. Actions in Azure are combined in a [role 
+definition](https://docs.microsoft.com/en-us/azure/role-based-access-control/role-definitions) which a subject must be assigned to invoke. Action URNs 
+for Azure in IDQL are of the form:
+> `azure:{Company}.{ProviderName}/{resourceType}/{action}`
+
+For example:  `azure:microsoft.directory/applicationPolicies/allProperties/read` permits the requestor to read all 
+properties on an application policy. 
+
+A [contributor action](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor) 
+may be defined in IDQL as:
+```json lines
+"actions" : [
+  {"actionUri": "azure:*"},
+  {"actionUri": "azure:Microsoft.Authorization/*/Delete", "exclude": true},
+  {"actionUri": "azure:Microsoft.Authorization/*/Write", "exclude": true},
+  {"actionUri": "azure:Microsoft.Authorization/elevateAccess/Action", "exclude": true},
+  {"actionUri": "azure:Microsoft.Blueprint/blueprintAssignments/write", "exclude": true},
+  {"actionUri": "azure:Microsoft.Blueprint/blueprintAssignments/delete", "exclude": true} 
+]
+```
+
+#### 4.4.4 Google URNs for Actions
+
+The `<domain-arn>` prefix for Google in IDQL is `gcp:`. Google uses roles which contain one or more permissions that 
+indicate permissable actions (see [Understanding Roles](https://cloud.google.com/iam/docs/understanding-roles#predefined_roles)).
+
+For the `actionUri`, GCP Roles are expressed as:
+> `gcp:roles/<api>.<role>`
+
+For example: `roles/file.viewer` becomes `gcp:roles/file.viewer`.
+
 
 ### 4.5 Object
 
@@ -591,29 +715,15 @@ A condition consists of a `role` or a `rule` and an optional `action`:
   * `audit` - The rule is not enforced, but processing outcome is logged.
 
 ---
-## 5.0 Evaluation Processing Rules
 
->What happens when no values provided for subjects/actions/objects?
->
->What happens when multiple values are provided for subjects/actions/objects?
->
->In the absence of matches deny is always the default.
->
->Deny always supersedes Allow.  With no permissive rule, deny is the default response.
+## 5.0 Appendix A - Use Cases
 
----
-## 6.0 Deployment Lifecycle
-
->Define a typical lifecycle. Does this belong here?
-
-## 7.0 Appendix A - Use Cases
-
-### 7.1 General RBAC Policy Examples
+### 5.1 General RBAC Policy Examples
 
 This use case will attempt to map the example given in the introduction to each platform.
 
 -----
-#### 7.1.1 Google Policy
+#### 5.1.1 Google Policy
 
 Considering the example:
 ```json
@@ -685,7 +795,7 @@ HTTP POST https://iap.googleapis.com/v1/projects/xyz/iap_web/compute/services/55
 
    
 ----
-#### 7.1.2 AWS API Policy
+#### 5.1.2 AWS API Policy
 
 Following the same IDQL example in the Google example (Section 7.1.1). The asset information might look like:
 In the assets data, it is assumed that the configuration information stores the following variables for the object
@@ -731,7 +841,7 @@ A resource policy may be attached to an
 > TODO: This policy does not implement the condition employeeType eq contractor.
 
 ----
-#### 7.1.3 Azure App Role
+#### 5.1.3 Azure App Role
 
 Following the same IDQL example in the Google example (Section 7.1.1). The asset information might look like:
 In the assets data, it is assumed that the configuration information stores the following variables for the object
