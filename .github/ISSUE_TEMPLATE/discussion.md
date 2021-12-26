@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Please provide some basic information describing your suggestion*
-A clear and concise description of what the problem is. E
+A clear and concise description of what the problem is.
 
 **Describe the change you would like to propose**
 A clear and concise description of how you would like to change the specification or what issue needs to be addressed.
