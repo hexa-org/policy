@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/idql-org/IDQL-specs/main/schema/idql-policy.schema.json",
   "idql-policies": [
     {
       "id": "CanaryProfileGoogleUpdate",

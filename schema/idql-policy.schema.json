@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/independentid/IDQL-specs/schema/idql-policy.schema.json",
+  "$id": "https://raw.githubusercontent.com/idql-org/IDQL-specs/main/schema/idql-policy.schema.json",
   "title": "IDQL Policy",
   "description": "Schema for IDQL Policy statements",
   "type": "object",
