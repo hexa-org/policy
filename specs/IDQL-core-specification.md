@@ -48,22 +48,21 @@ Table of Contents
 ## 1.0 Introduction
 Identity Query Language (IDQL) is a security policy language that can be expressed in either
 [YAML](https://yaml.org/spec/) 
-or [JSON (RFC8259)](https://datatracker.ietf.org/doc/html/rfc8259). IDQL is intended to be used to manage security 
-policy in distributed, hybrid [definition?], multi-cloud environments. The intent of IDQL is that all components, of a 
-cloud based application from network to application layers may manage access regardless of proprietary platform or 
+or [JSON (RFC8259)](https://datatracker.ietf.org/doc/html/rfc8259). IDQL is used a multi-platform neutral policy 
+language for distributed, hybrid, multi-cloud environments. The intent of IDQL is that all components, 
+of a cloud based application from network to application layers may manage access regardless of proprietary platform or 
 container. IDQL policy may be enforced directly or mapped and converted into 
-proprietary platforms that implement IDQL enabled gateways (see: open source project TBD).
+proprietary platforms that implement IDQL enabled gateways (see: [Hexa Project](https://github.com/idql-org/hexa)).
 
 ![IDQL Policy Graphic](../collateral/images/IDQL-rule.png "IDQL-rule")
 
-An IDQL policy rule identifies a `subject` provider that is permitted one or more `actions` against a target `object` 
-with an OPTIONAL set of `scopes` that MAY be used in a condition or returned to the target (e.g. dataSet = "US"). 
+An IDQL policy rule identifies a `subject` provider that is permitted one or more `actions` against a target 
+`object` with an OPTIONAL set of `scopes` that MAY be used in a condition or returned to the target (e.g. dataSet = "US"). 
 IDQL policy MAY be expressed in YAML or JSON format.
 
-IDQL is intended to be used with an [IDQL Policy Gateway API] (the "Gateway") which enables retrieval of deployment 
+IDQL is intended to be used with the [Hexa Policy Gateway API](https://github.com/idql-org/hexa) (the "Gateway") which enables retrieval of deployment 
 environments and the ability to retrieve, update, and provision policy. The Gateway defines identifiers for the 
-assets referred to in 
-IDQL policy such as: 
+assets referred to in IDQL policy such as: 
 * `provId` - The identifier of an Identity Provider (e.g. "myGoogleIDP") that will provide the "subjects" referred to in 
   the policy.
 * `assetId` - The identifier of a service or entity where policy is deployed (e.g. "CanaryProfileService").
@@ -71,7 +70,7 @@ IDQL policy such as:
 ### Example IDQL Policy
 
 The following shows a policy that users from a provider known as "myGoogleIDP" or entities with an IP address 
-matching IP CIDR 192.168.0.1/24 may perform a `createProfile` or `editProfile` action against the target object 
+matching IP CIDR 192.168.0.1/24 may perform a `createProfile` or `editProfile` action against the target `object` 
 `CanaryProfileService`. When from "myGoogleIDP" The`editProfile` action also 
 requires that the User `employeeType` be equal to `contract`. 
 
@@ -151,7 +150,7 @@ In the above example, 3 policies are defined:
   account "WorkFlowSvcAcnt".
 
 The JSON representation of the YAML policy above:
-```json lines
+```json
 {
   "$schema": "https://raw.githubusercontent.com/idql-org/IDQL-specs/main/schema/idql-policy.schema.json",
   "idql-policies": [
@@ -248,10 +247,11 @@ The JSON representation of the YAML policy above:
 
 IDQL MAY be expressed in either [YAML](https://yaml.org) or 
 [JSON (RFC8259)](https://datatracker.ietf.org/doc/html/rfc8259) form. This specification uses the 
-[JSON Schema Specification](https://json-schema.org) to formalize its [format](../schema/idql-policy.schema.json) for 
-validation purposes.  
+[JSON Schema Specification](https://json-schema.org) to validate 
+[IDQL Policy Schema](../schema/idql-policy.schema.json).  
 
-The media type for IDQL YAML is `application/idql+yaml` and `application/idql+json` for JSON formatted content.
+The media type for IDQL YAML is `application/idql+yaml` and `application/idql+json` for JSON formatted content 
+(currently not formally registered).
 
 ---
 ## 3.0 IDQL and The Policy Environment
@@ -263,19 +263,16 @@ information, policy conditions MAY use contextual attributes to apply conditions
 
 ### 3.1 Project Context
 
-IDQL assumes project configuration information (e.g. from the Policy Gateway) that defines the sources (subjects) and 
-targets (objects) of 
-data upon which IDQL 
-rules operate. The Policy Gateway provides the following objects
+IDQL assumes project configuration information (e.g. from the Policy Gateway) that defines the sources `subject` and 
+target `object` of data upon which IDQL rules operate. The Policy Gateway provides the following items:
 * _Identity Providers_ define `authId` identifiers are used in a `subject` clause in IDQL. Each provider SHOULD 
   have a set of claims which may be used in policy conditions. Where possible, claims from Identity Providers
   should be mapped to definitions from: 
-  * [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.
-    html#Claims). 
+  * OpenID Connect [Claims](https://openid.net/specs/openid-connect-core-1_0.html#Claims). 
   * And, for extended User profile attributes, use 
     [SCIM User schema under IANA](https://www.iana.org/assignments/scim/scim.xhtml).
-* _Assets_ are referred to in IDQL policy as part of the `object` attribute. An asset represents on object where 
-  policy may be applied. An asset often has a pre-defied set of permissible `actions` (e.g. roles or permissions) that 
+* _Assets_ are referenced in the `assetId` attribute of a target `object`. An asset represents on 
+  object where policy may be applied. An asset often has a pre-defied set of permissible `actions` (e.g. roles or permissions) that 
   MAY be allowed, denied, and/or scoped in within an IDQL policy rule. 
 
 ### 3.2 How Policy Is Deployed
@@ -283,7 +280,7 @@ rules operate. The Policy Gateway provides the following objects
 In practice, a Policy Gateway (e.g. [Hexa](https://github.com/idql-org/hexa)) system maps IDQL Policy to each platform and its native policy system.
 In different cloud native environments, policy decision and enforcement may occur using different models and methods. 
 Policy deployment, processing and enforcement may be local to the asset (e.g. using the 
-[Open Poilicy Agent sidecar pattern](https://www.openpolicyagent.org/docs/latest/integration/#comparison)), 
+[Open Policy Agent sidecar pattern](https://www.openpolicyagent.org/docs/latest/integration/#comparison)), 
 delivered through a shared service Policy Decision Point (PDP), or handled directly through a platform's administrative 
 interfaces, or other method. As a declarative policy system, it is assumed that the policy administrative gateway 
 services for IDQL will handle delivery and configuration with the defined policy assets.
@@ -302,7 +299,7 @@ For AWS, the server information needed to identify an asset might include:
   "region": "us-east-1",
   "stage-name": "",
   "http-verb": "",
-  "resoource-path-specifier": "/Profile/*"
+  "resource-path-specifier": "/Profile/*"
 }
 ```
 
@@ -316,11 +313,11 @@ For Azure, configuration information includes:
   "api-id": "8763f1c4-0000-0000-0000-158e9ef97d6a",
   "location": "us-east-1",
   "stage-name": "",
-  "resoource": "/Profile/*"
+  "resource": "/Profile/*"
 }
 ```
 
-For GCP, configruation information could include:
+For GCP, configuration information could include:
 ```json
 {
   "id": "CanaryProfileService",
@@ -339,13 +336,13 @@ policy gateway and policy editor will use `type` to look up asset .
 
 ### 3.3 Contextual Attributes
 
-Some policy statemetns which are applied during a client request require contextual variables. The following neutral 
+Some policy statements which are applied during a client request require contextual variables. The following neutral 
 variables MAY be used to define conditions which are then mapped to the various platforms (e.g. OPA, AWS, Azure, GCP)
-if supproted.
+if supported.
 
 Request context attributes:
 * `req` - Holds information about the incoming request context. E.g. `req.ip` or `req.protocol`.
-  * `ip` - The IP address of the requestor.
+  * `ip` - The IP address of the requesting client.
   * `protocol` - The protocol portion of the request URI (e.g. HTTP).
   * `time` - The time of the client request
   * `param.<name>` - Returns the value of any request parameter (`<name>`) in the URI following and separated by the 
@@ -355,7 +352,7 @@ Request context attributes:
   * `query` - Returns any information contained after a `?` in a request URI.
   * `http` - When the protocol used is HTTP, enables access to HTTP request information.
     * `header.<header-name>` - May be used to compare the value of a particular http header specified by `<header-name>`.
-    If multiple headers ofthe same name exists, then the value is considered muli-valued. Any comparison that matches 
+    If multiple headers of the same name exists, then the value is considered multi-valued. Any comparison that matches 
     a single-value SHALL be considered a match. For example `req.http.header.authorization sw bearer`.
     * `method` - The HTTP Method used to make the request (e.g. GET, POST, DELETE, PUT, PATCH).
 
@@ -379,7 +376,9 @@ See [IDQL Providers Specification](IDQL-providers.md) for information on subject
 
 A set of IDQL Policy Statements is contained in an array of `idql-policies` which contains 1 or more IDQL "Policy 
 statements". The JSON-Schema (`$schema`) for these policies MAY be referenced:
-> "$schema": "https://raw.githubusercontent.com/idql-org/IDQL-specs/main/schema/idql-policy.schema.json"
+```json lines
+ "$schema": "https://raw.githubusercontent.com/idql-org/IDQL-specs/main/schema/idql-policy.schema.json"
+```
 
 Each Policy Statement consists of the following attributes:
 * `id` - An unique attribute for the policy statement.
@@ -403,7 +402,7 @@ Each Policy Statement consists of the following attributes:
 The `meta` attribute is a top level policy object containing attributes for versioning and information 
 organization. All meta attributes are OPTIONAL.
 
-```yaml 
+```yaml
 $schema: https://raw.githubusercontent.com/idql-org/IDQL-specs/main/schema/idql-policy.schema.json
 idql-policies:
 - id: example-policy
@@ -418,11 +417,11 @@ idql-policies:
     . . .
   actions:
     . . .
-  objects:
+  object:
     . . .
 ```
 
-Attributres used for versioning of policy statements include:
+Attributes used for versioning of policy statements include:
 * `date` - A modification date expressed in `DateTime` format. Value MUST be encoded as a valid `xsd:dateTime` 
   as specified in Section 3.3.7 of XML XSD Definitions (See: 
   [W3C XML Schema Definition Language(XSD) 1.1 Part2: Data Types](http://www.w3.org/TR/xmlschema11-2/))
@@ -446,9 +445,10 @@ Informational attributes include:
 
 ### 4.3 Subject
 
-The `subject` object (OPTIONAL) defines an authentication state (e.g. anonymous) or Identity Provider to identify a 
+The `subject` JSON object defines an authentication state (e.g. anonymous) or Identity Provider to 
+identify a 
 security entity invoking a request. If `subject` is not present, the policy rule is applied to all requests, regardless of authentication 
-status (e.g. HTTP authorization is ignored) and SHALL be treated as equivalent to a subject type (`subType`) of `any`.
+type and SHALL be treated as equivalent to a subject type (`subType`) of `any`.
 ```yaml
 idql-policies:
 - id: example-policy
@@ -460,7 +460,7 @@ idql-policies:
     role: goldService
   actions:
     . . .
-  objects:
+  object:
     . . .
 ```
 A `subject` is a JSON or YAML object consisting of the following attributes:
@@ -509,7 +509,7 @@ idql-policies:
     actionUri: ietf:https:PUT|PATCH:/Users/*
     condition:
       rule: adminType eq admincontractor
-  objects:
+  object:
     . . .
 ```
 
@@ -559,7 +559,7 @@ Example actions:
 | IAM | `arn:iam:ChangePassword`|
 | S3 | `arn:s3:GetObject` |
 
-In Amazon ARNS, wildcards (`*`) MAY be used. For example: `arn:s3:*` allows any action on an S3 object.
+In an Amazon ARN, wildcards (`*`) MAY be used. For example: `arn:s3:*` allows any action on an S3 object.
 
 #### 4.4.3 Microsoft Azure URNs for Actions
 
@@ -568,8 +568,8 @@ definition](https://docs.microsoft.com/en-us/azure/role-based-access-control/rol
 for Azure in IDQL are of the form:
 > `azure:{Company}.{ProviderName}/{resourceType}/{action}`
 
-For example:  `azure:microsoft.directory/applicationPolicies/allProperties/read` permits the requestor to read all 
-properties on an application policy. 
+For example:  `azure:microsoft.directory/applicationPolicies/allProperties/read` permits the requesting client to read 
+all properties on an application policy. 
 
 A [contributor action](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor) 
 may be defined in IDQL as:
@@ -587,7 +587,8 @@ may be defined in IDQL as:
 #### 4.4.4 Google URNs for Actions
 
 The `<domain-arn>` prefix for Google in IDQL is `gcp:`. Google uses roles which contain one or more permissions that 
-indicate permissable actions (see [Understanding Roles](https://cloud.google.com/iam/docs/understanding-roles#predefined_roles)).
+indicate permissible actions 
+(see [Understanding Roles](https://cloud.google.com/iam/docs/understanding-roles#predefined_roles)).
 
 For the `actionUri`, GCP Roles are expressed as:
 > `gcp:roles/<api>.<role>`
@@ -597,8 +598,8 @@ For example: `roles/file.viewer` becomes `gcp:roles/file.viewer`.
 
 ### 4.5 Object
 
-Objects are assets in a project which are protected by policy. Objects are an identified asset combined with a path 
-specification.
+Objects are assets in a project protected by policy. A policy `object` is an identified asset combined with an optional 
+path specification (`pathSpec`).
 
 ```yaml
 idql-policies:
@@ -609,8 +610,8 @@ idql-policies:
     . . .
   actions:
     . . .
-  objects:
-  - assetId: CanaryProfileService
+  object:
+    assetId: CanaryProfileService
     pathSpec: /Profile/${User:username}
 ```
 
@@ -622,7 +623,7 @@ An object consists of the following attributes:
 
 ### 4.6 Scopes
 
-Scopes are used to define variables which may be used in `conditions` and paths in `actions` and `objects`.
+Scopes are used to define variables which may be used in `conditions`, `actions` and/or an `object`.
 
 Scope variables may also be returned to applications instead of an allow/deny boolean response. How this is done is 
 determined by the Policy Gateway.
@@ -636,17 +637,17 @@ idql-policies:
     . . .
   actions:
     . . .
-  objects:
-  - assetId: CanaryProfileService
+  object:
+    assetId: CanaryProfileService
     pathSpec: /Profile/*
   scopes:
   - name: adminType
     value: admin-contractor
-    condition:
-      rule: User:employeeType eq contract
-      action: allow
   - name: workCountry
     value: ${Users:addresses[type eq work].country}
+  condition:
+    rule: User:employeeType eq contract
+    action: allow
 ```
 
 A scope consists of the following attributes:
@@ -656,7 +657,7 @@ A scope consists of the following attributes:
   substitution denoted by `${<variable>}` where <variable> is the variable name.  For example: `"admin-${User:employeeType}"`
 
 Note in the above scope example:
-* workCountry is a scope variable `workCountry` that is defined as the employee's work
+* `workCountry` is a scope variable `workCountry` that is defined as the employee's work
 address. The qualifier `[type eq work]` selects the work address value from the multi-valued attribute `addresses` and
 assigns the value of sub-attribute `country`.
 * `adminType` is assigned `admin-contractor` if the User's `employeeType` attribute is equal to `contract`.
@@ -678,8 +679,8 @@ idql-policies:
   - name: editProfile
     actionUri: https:PUT|PATCH:/Users/*
   condition:
-    rule: role eq admincontractor and subject.jwt.iss eq oidc.strata.io
-  objects:
+    rule: role eq admincontractor and subject.jwt.iss eq oidc.canarybank.io
+  object:
     . . .
 ```
 
@@ -742,7 +743,7 @@ Considering the example:
 }
 ```
 
-In the assets data, it is assumed that the configuration information stores the following variables for the object
+In the asset's data, it is assumed that the configuration information stores the following variables for the object
 CanaryProfileService`.
 ```json
 {
@@ -783,7 +784,7 @@ HTTP POST https://iap.googleapis.com/v1/projects/xyz/iap_web/compute/services/55
 #### 5.1.2 AWS API Policy
 
 Following the same IDQL example in the Google example (Section 7.1.1). The asset information might look like:
-In the assets data, it is assumed that the configuration information stores the following variables for the object
+In the asset's data, it is assumed that the configuration information stores the following variables for the object
 CanaryProfileService`.
 ```json
 {
@@ -794,7 +795,7 @@ CanaryProfileService`.
   "region": "us-east-1",
   "stage-name": "",
   "http-verb": "",
-  "resoource-path-specifier": "/Profile/*"
+  "resource-path-specifier": "/Profile/*"
 }
 ```
 
@@ -828,7 +829,7 @@ A resource policy may be attached to an
 #### 5.1.3 Azure App Role
 
 Following the same IDQL example in the Google example (Section 7.1.1). The asset information might look like:
-In the assets data, it is assumed that the configuration information stores the following variables for the object
+In the asset's data, it is assumed that the configuration information stores the following variables for the object
 CanaryProfileService`.
 ```json
 {
@@ -839,7 +840,7 @@ CanaryProfileService`.
   "api-id": "8763f1c4-0000-0000-0000-158e9ef97d6a",
   "location": "us-east-1",
   "stage-name": "",
-  "resoource": "/Profile/*"
+  "resource": "/Profile/*"
 }
 ```
 In Azure, users and groups are assigned roles in the directory using Graph.  You then can add User or Application roles 
