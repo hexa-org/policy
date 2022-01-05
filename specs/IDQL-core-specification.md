@@ -63,7 +63,7 @@ IDQL policy MAY be expressed in YAML or JSON format.
 IDQL is intended to be used with the [Hexa Policy Gateway API](https://github.com/idql-org/hexa) (the "Gateway") which enables retrieval of deployment 
 environments and the ability to retrieve, update, and provision policy. The Gateway defines identifiers for the 
 assets referred to in IDQL policy such as: 
-* `provId` - The identifier of an Identity Provider (e.g. "myGoogleIDP") that will provide the "subjects" referred to in 
+* `providerId` - The identifier of an Identity Provider (e.g. "myGoogleIDP") that will provide the "subjects" referred to in 
   the policy.
 * `assetId` - The identifier of a service or entity where policy is deployed (e.g. "CanaryProfileService").
 
@@ -157,15 +157,15 @@ The JSON representation of the YAML policy above:
     {
       "id": "CanaryProfileGoogleUpdate",
       "meta": {
-        "vers": "0.1",
+        "version": "0.1",
         "date": "2021-08-01 21:32:44 UTC",
-        "disp": "Access enabling user self service for users with role",
-        "app": "CanaryBank1",
+        "description": "Access enabling user self service for users with role",
+        "applicationId": "CanaryBank1",
         "layer": "Browser"
       },
       "subject": {
-        "subType": "op",
-        "provId": "myGoogleIDP",
+        "type": "op",
+        "providerId": "myGoogleIDP",
         "role": "canarySelfService"
       },
       "actions": [
@@ -185,15 +185,15 @@ The JSON representation of the YAML policy above:
     {
       "id": "EditProfileGoogleUpdate AdminContractor",
       "meta": {
-        "vers": "0.1",
+        "version": "0.1",
         "date": "2021-08-01 21:32:44 UTC",
-        "disp": "Access policy enabling contract staff to edit profiles",
-        "app": "CanaryBank1",
+        "description": "Access policy enabling contract staff to edit profiles",
+        "applicationId": "CanaryBank1",
         "layer": "Browser"
       },
       "subject": {
-        "subType": "op",
-        "provId": "myGoogleIDP"
+        "type": "op",
+        "providerId": "myGoogleIDP"
       },
       "actions": [
         {
@@ -213,14 +213,14 @@ The JSON representation of the YAML policy above:
     {
       "id": "CanaryProfileInternalNetUpdate",
       "meta": {
-        "vers": "0.1",
+        "version": "0.1",
         "date": "2021-08-01 21:32:44 UTC",
-        "disp": "Enabling profile update for internal network services",
-        "app": "CanaryBank1",
+        "description": "Enabling profile update for internal network services",
+        "applicationId": "CanaryBank1",
         "layer": "Services"
       },
       "subject": {
-        "subType": "net",
+        "type": "net",
         "cidr": "192.168.1.0/24",
         "members": ["WorkFlowSvcAcnt"]
       },
@@ -358,7 +358,7 @@ Request context attributes:
 
 Attributes about the current authenticated subject:
 * `subject.provId` - The identifier for the provider under which the subject was authenticated. For example, this
-  may be used when a subject source is `any` or `auth` but a condition applies to a specific provider.
+  may be used when a subject source is `any` or `anyAuthenticated` but a condition applies to a specific provider.
 * `subject.jwt.<claim>` - If a JWT was used, specific claims can be compared where <claim> is the name of a claim. For 
   example `subject.jwt.iss eq my.example.com`
 * `subject.roles` - Roles mapped by the provider to the subject if any.
@@ -426,7 +426,7 @@ Attributes used for versioning of policy statements include:
   as specified in Section 3.3.7 of XML XSD Definitions (See: 
   [W3C XML Schema Definition Language(XSD) 1.1 Part2: Data Types](http://www.w3.org/TR/xmlschema11-2/))
   and MUST include both a date and a time. A `date` SHALL have no case sensitivity or uniqueness.
-* `vers` - A version identifier used to distinguish different policy versions (e.g. 1.0.1)
+* `version` - A version identifier used to distinguish different policy versions (e.g. 1.0.1)
 * `etag` - A hash value of the mapped IDQL statement per 
   [Section 2.3 of RFC7232](https://datatracker.ietf.org/doc/html/rfc7232#section-2.3). If etags are supported by the 
   target platform (e.g.
@@ -438,8 +438,8 @@ Attributes used for versioning of policy statements include:
   and returned after an IDQL client creates or modifies an IDQL policy.
 
 Informational attributes include:
-* `app` - An OPTIONAL string identifier that may be used to group policy statements pertaining to a common application.
-* `disp` - An OPTIONAL string containing a description of the intent of the policy.
+* `applicationId` - An OPTIONAL string identifier that may be used to group policy statements pertaining to a common application.
+* `description` - An OPTIONAL string containing a description of the intent of the policy.
 * `layer` - An OPTIONAL string identifier that may be used to group policy statements in a common container or 
   application layer.
 
@@ -448,7 +448,7 @@ Informational attributes include:
 The `subject` JSON object defines an authentication state (e.g. anonymous) or Identity Provider to 
 identify a 
 security entity invoking a request. If `subject` is not present, the policy rule is applied to all requests, regardless of authentication 
-type and SHALL be treated as equivalent to a subject type (`subType`) of `any`.
+type and SHALL be treated as equivalent to a subject type (`type`) of `any`.
 ```yaml
 idql-policies:
 - id: example-policy
@@ -464,9 +464,9 @@ idql-policies:
     . . .
 ```
 A `subject` is a JSON or YAML object consisting of the following attributes:
-* `subType` - A text value indicating the type of subject provider being referenced. Supported values include: 
+* `type` - A text value indicating the type of subject provider being referenced. Supported values include: 
   * `any` - Any subject whether authenticated or anonymous (this is the same is not specifying a subject)
-  * `auth` - Any authenticated subject using any Identity Provider
+  * `anyAuthenticated` - Any authenticated subject using any Identity Provider
   * `basic` - A subject authenticated using [HTTP Basic Auth (RFC7617)](https://datatracker.ietf.org/doc/html/rfc7617).
   * `jwt` - A subject that is authenticated by validating a
     [JWT token (RFC7519, RFC8725)](https://datatracker.ietf.org/doc/html/rfc8725) issued by an [OAuth2 Authorization
@@ -486,7 +486,7 @@ A `subject` is a JSON or YAML object consisting of the following attributes:
   specified, the group must be part of the inbound JWT assertion or be defined locally (e.g. in SCIM or database 
   service).
 
-When `subType` is one of: `basic`, `jwt`, `op`, `saml`, or `other`, the attribute `authId` specifies the identifier of 
+When `type` is one of: `basic`, `jwt`, `op`, `saml`, or `other`, the attribute `authId` specifies the identifier of 
 an Identity Provider configured as part of the policy project assets.
 
 ### 4.4 Actions
@@ -706,25 +706,22 @@ A condition consists of a `rule` and an optional `action` which describes the im
 
 ### 5.1 General RBAC Policy Examples
 
-This use case will attempt to map the example given in the introduction to each platform.
-
------
-#### 5.1.1 Google Policy
+This use case will attempt to map the following IDQL Policy to each platform.
 
 Considering the example:
 ```json
 {
-  "id": "EditProfileGoogleUpdate AdminContractor",
+  "id": "EditProfileService",
   "meta": {
-    "vers": "0.1",
+    "version": "0.1",
     "date": "2021-08-01 21:32:44 UTC",
-    "disp": "Access policy enabling contract staff to edit profiles",
-    "app": "CanaryBank1",
+    "description": "Access policy enabling staff to edit profiles",
+    "applicationId": "CanaryBank1",
     "layer": "Browser"
   },
   "subject": {
-    "subType": "op",
-    "provId": "myGoogleIDP"
+    "type": "op",
+    "providerId": "corpOpenIdProvider"
   },
   "actions": [
     {
@@ -737,14 +734,18 @@ Considering the example:
     "pathSpec": "/Profile/*"
   },
   "condition": {
-    "rule": "User:employeeType eq contract",
+    "description": "Employee access allowed until 2025-01-01",
+    "rule": "req.time lt \"2025-01-01T00:00:00Z\"",
     "action": "allow"
   }
 }
 ```
+-----
+#### 5.1.1 Google Policy
 
-In the asset's data, it is assumed that the configuration information stores the following variables for the object
-CanaryProfileService`.
+For an application deployed on the Google Cloud Platform, it is assumed that the configuration 
+information stores the following variables for the object `CanaryProfileService`.
+
 ```json
 {
   "id": "CanaryProfileService",
@@ -755,7 +756,7 @@ CanaryProfileService`.
 }
 ```
 
-The policy to be applied would be:
+The translated IDQL policy to be applied would be:
 ```json lines
 HTTP POST https://iap.googleapis.com/v1/projects/xyz/iap_web/compute/services/55ec91ba47ba4f44adf0ef3b748e430f
 :setIamPolicy
@@ -769,15 +770,14 @@ HTTP POST https://iap.googleapis.com/v1/projects/xyz/iap_web/compute/services/55
           "domain:canarybank.io"
         ],
         "condition": {
-          "expression": "request.path.startsWith(\"/Profile\") && account.properties.employeeType == \"contractor\""
+          "description": "Employee access allowed until 2025-01-01",
+          "expression": "request.time < 2025-01-01T00:00:00Z"
         }
       }
     ]
   }
 }
 ```
-
-> Note: It is not clear that the CEL expression "account.properties.employeeType" is possible with IAP.
 
    
 ----
@@ -799,7 +799,7 @@ CanaryProfileService`.
 }
 ```
 
-Likewise, the subject provider `myGoogleIdp` maps back to a federated OIDC provider whose URI is:  `idp.canarybank.io`.
+Likewise, the subject provider `corpOpenIdProvider` maps back to a federated OIDC provider whose URI is:  `idp.canarybank.io`.
 
 An AWS resource is typically defined by:
 
@@ -812,23 +812,24 @@ A resource policy may be attached to an
 ```json
 {
     "Version": "0.1",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Principal": {
-              "Federated": "idp.canarybank.io"
-            },
-            "Action": "execute-api:Invoke",
-            "Resource": "arn:aws:execute-api:us-east-1:xyz:a1234567890/*/*/Profile/*"
-        }]
+    "Statement": {
+        "Effect": "Allow",
+        "Principal": {
+          "Federated": "idp.canarybank.io"
+        },
+        "Action": "execute-api:Invoke",
+        "Resource": "arn:aws:execute-api:us-east-1:xyz:a1234567890/*/*/Profile/*",
+        "Condition": {
+          "DateLessThan": {"aws:CurrentTime": "2025-01-01T00:00:00Z"}
+        }
+    }
 }
 ```
-> TODO: This policy does not implement the condition employeeType eq contractor.
 
 ----
 #### 5.1.3 Azure App Role
 
-Following the same IDQL example in the Google example (Section 7.1.1). The asset information might look like:
+Following the same IDQL example in the introduction (5.1), the asset information might look like:
 In the asset's data, it is assumed that the configuration information stores the following variables for the object
 CanaryProfileService`.
 ```json
@@ -844,16 +845,15 @@ CanaryProfileService`.
 }
 ```
 In Azure, users and groups are assigned roles in the directory using Graph.  You then can add User or Application roles 
-to an application. The azure case is unclear for a federated provider. 
+to an 
+[application](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps). 
+The azure case is unclear for a federated provider. 
 
 The following policy assigns a role to an application.  When the User is authenticated, the roles claim must include 
 the value `accountEdit`.
 
-> TODO: It is unclear how Azure would enforce the employeeType eq contractor. Presumably this is done in the AD 
-> graph rather than handled dynamically.
-
 ```json
-"appId": "8763f1c4-0000-0000-0000-158e9ef97d6a",
+"applicationId": "8763f1c4-0000-0000-0000-158e9ef97d6a",
 "appRoles": [
     {
       "allowedMemberTypes": [

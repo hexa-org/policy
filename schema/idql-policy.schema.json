@@ -24,11 +24,11 @@
                 "format": "date-time",
                 "description": "Optional modification date in DateTime format (e.g., 2008-01-23T04:56:22Z)"
               },
-              "app": {
+              "applicationId": {
                 "type": "string",
                 "description": "An app identifier to link related policies together for an application"
               },
-              "vers": {
+              "version": {
                 "type": "string",
                 "description": "A version identifier to distinguish different policy versions"
               },
@@ -36,7 +36,7 @@
                 "type": "string",
                 "description": "A hash of the current policy per Section 2.3 of [RFC7232]."
               },
-              "disp": {
+              "description": {
                 "type": "string",
                 "description": "A human readable description of the policy"
               },
@@ -50,9 +50,9 @@
           "subject": {
             "type": "object",
             "properties": {
-              "subType": {
-                "enum": ["any","auth","basic","jwt","op","saml","net","other"],
-                "description": "The subject type which is one of any|basic|jwt|idp|ref|net|other"
+              "type": {
+                "enum": ["any","anyAuthenticated","basic","jwt","op","saml","net","other"],
+                "description": "Subject type which is one of any|anyAuthenticated|basic|jwt|idp|ref|net|other"
               },
               "role": {
                 "type": "string",
@@ -60,7 +60,7 @@
               },
               "members": {
                 "type": "array",
-                "description": "",
+                "description": "An array of strings representing usernames, service accounts, or groups that may be matched.",
                 "items": {
                   "type": "string"
                 }
@@ -69,8 +69,8 @@
                 {
                   "$comment": "This validates type subject type 'basic'.",
                   "if": {
-                    "properties": { "subType": { "const": "basic" }},
-                    "required": ["subType"]
+                    "properties": { "type": { "const": "basic" }},
+                    "required": ["type"]
                   },
                   "then": {
                     "properties": {
@@ -85,8 +85,8 @@
                 {
                   "$comment": "This validates a JWT (e.g. OAuth2) based authorization",
                   "if": {
-                    "properties": { "subType":  {"const":  "jwt"}},
-                    "required": ["subType"]
+                    "properties": { "type":  {"const":  "jwt"}},
+                    "required": ["type"]
                   },
                   "then": {
                     "properties": {
@@ -101,8 +101,8 @@
                 {
                   "$comment": "This validates a authorization based on OIDC provider",
                   "if": {
-                    "properties": { "subType":  {"const":  "op"}},
-                    "required": ["subType"]
+                    "properties": { "type":  {"const":  "op"}},
+                    "required": ["type"]
                   },
                   "then": {
                     "properties": {
@@ -117,8 +117,8 @@
                 {
                   "$comment": "This validates a authorization based a SAML IDP provider",
                   "if": {
-                    "properties": { "subType":  {"const":  "saml"}},
-                    "required": ["subType"]
+                    "properties": { "type":  {"const":  "saml"}},
+                    "required": ["type"]
                   },
                   "then": {
                     "properties": {
@@ -133,8 +133,8 @@
                 {
                   "$comment": "This validates a authorization based on a network mask(s)",
                   "if": {
-                    "properties": { "subType":  {"const":  "net"}},
-                    "required": ["subType"]
+                    "properties": { "type":  {"const":  "net"}},
+                    "required": ["type"]
                   },
                   "then": {
                     "properties": {
@@ -154,8 +154,8 @@
                 {
                   "$comment": "This validates a authorization OTHER provider",
                   "if": {
-                    "properties": { "subType":  {"const":  "other"}},
-                    "required": ["subType"]
+                    "properties": { "type":  {"const":  "other"}},
+                    "required": ["type"]
                   },
                   "then": {
                     "properties": {
@@ -255,6 +255,10 @@
                   "disabled"
                 ],
                 "description": "The outcome desired if condition is a match (default='allow')"
+              },
+              "description": {
+                "type": "string",
+                "description": "Information describing the purpose of the condition"
               }
             },
             "anyOf": [

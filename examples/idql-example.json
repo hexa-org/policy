@@ -4,15 +4,15 @@
     {
       "id": "CanaryProfileGoogleUpdate",
       "meta": {
-        "vers": "0.1",
+        "version": "0.1",
         "date": "2021-08-01 21:32:44 UTC",
-        "disp": "Access enabling user self service for users with role",
-        "app": "CanaryBank1",
+        "description": "Access enabling user self service for users with role",
+        "applicationId": "CanaryBank1",
         "layer": "Browser"
       },
       "subject": {
-        "subType": "op",
-        "provId": "myGoogleIDP",
+        "type": "op",
+        "providerId": "myGoogleIDP",
         "role": "canarySelfService"
       },
       "actions": [
@@ -32,15 +32,15 @@
     {
       "id": "EditProfileGoogleUpdate AdminContractor",
       "meta": {
-        "vers": "0.1",
+        "version": "0.1",
         "date": "2021-08-01 21:32:44 UTC",
-        "disp": "Access policy enabling contract staff to edit profiles",
-        "app": "CanaryBank1",
+        "description": "Access policy enabling contract staff to edit profiles",
+        "applicationId": "CanaryBank1",
         "layer": "Browser"
       },
       "subject": {
-        "subType": "op",
-        "provId": "myGoogleIDP"
+        "type": "op",
+        "providerId": "myGoogleIDP"
       },
       "actions": [
         {
@@ -60,14 +60,14 @@
     {
       "id": "CanaryProfileInternalNetUpdate",
       "meta": {
-        "vers": "0.1",
+        "version": "0.1",
         "date": "2021-08-01 21:32:44 UTC",
-        "disp": "Enabling profile update for internal network services",
-        "app": "CanaryBank1",
+        "description": "Enabling profile update for internal network services",
+        "applicationId": "CanaryBank1",
         "layer": "Services"
       },
       "subject": {
-        "subType": "net",
+        "type": "net",
         "cidr": "192.168.1.0/24",
         "members": ["WorkFlowSvcAcnt"]
       },
