@@ -868,3 +868,28 @@ the value `accountEdit`.
   ],
 "availableToOtherTenants": false,
 ```
+
+In addition a [Custom Rule](https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/create-custom-waf-rules) 
+must be applied to define the condition:
+```json
+  {
+    "customRules": [
+      {
+        "name": "EditProfileServiceCondition",
+        "ruleType": "MatchRule",
+        "priority": 2,
+        "action": "Allow",
+        "matchConditions": [
+          {
+            "matchVariable": "RequestHeaders",
+            "selector": "Date",
+            "operator": "LessThan",
+            "matchValues": [
+              "2025-01-01T00:00:00Z"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+```
