@@ -8,7 +8,8 @@ policy language for use in hybrid and multi-cloud environments. IDQL is intended
 
 ## Conventions and Terminology
 
-All IDQL specification use a common formatting convention and terminology. For information see [Conventions](Conventions.md).
+All IDQL specifications use a common formatting convention and terminology. For information see [Conventions]
+(Conventions.md).
 
 ## Copyright Notice
 
