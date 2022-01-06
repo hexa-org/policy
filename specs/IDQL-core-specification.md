@@ -87,8 +87,8 @@ idql-policies:
       app: CanaryBank1
       layer: Browser
     subject:
-      subType: op
-      provId: myGoogleIDP
+      type: op
+      providerId: myGoogleIDP
       role: canarySelfService
     actions:
       - name: createProfile
@@ -106,8 +106,8 @@ idql-policies:
       app: CanaryBank1
       layer: Browser
     subject:
-      subType: op
-      provId: myGoogleIDP
+      type: op
+      providerId: myGoogleIDP
     actions:
       - name: editProfile
         actionUri: accountEdit
@@ -125,7 +125,7 @@ idql-policies:
       app: CanaryBank1
       layer: Services
     subject:
-      subType: net
+      type: net
       cidr: 192.168.1.0/24
       members:
        - WorkFlowSvcAcnt
@@ -455,8 +455,8 @@ idql-policies:
   meta:
     . . .
   subject:
-    subType: idp
-    provId: myGoogleIDP
+    type: op
+    providerId: myGoogleIDP
     role: goldService
   actions:
     . . .
@@ -476,7 +476,7 @@ A `subject` is a JSON or YAML object consisting of the following attributes:
   * `net` - A subject identified by the requesting client's network address expressed as an IP address or 
     [CIDR (RFC1817)](https://datatracker.ietf.org/doc/html/rfc1817) value. 
     Used for access control for internal services.
-  * `other` - A custom provider _[TODO: do we need this?]_
+* `providerId` - A unique URI referencing an asset the provides subject identities.
 * `role` - Defines a role which the subject MUST possess for a rule to apply. A role implies a set of
   actions (i.e. permissions) that provide the ability to execute the actions specified. Multiple role values MAY be 
   specified using a comma separator. When multiple roles are specified, all values must be asserted (treated as an 
@@ -671,8 +671,8 @@ idql-policies:
   meta:
     . . .
   subject:
-    subType: idp
-    provId: myGoogleIDP
+    type: idp
+    providerId: myGoogleIDP
   actions:
   - name: createProfile
     actionUri: https:POST:/Users/
