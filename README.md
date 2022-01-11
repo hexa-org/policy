@@ -56,9 +56,11 @@ translated into proprietary policy and published into existing IAM systems throu
 ## The Standard Process
 
 We are working with developers and customers to build a set of specifications and open source as part of the Cloud 
-Native Computing Foundation. The IDQL Working Group will be responsible for the policy specification and API 
-definitions published on this site. 
+Native Computing Foundation. The IDQL Working Group will be responsible for the policy specification 
+published on this project. 
 
-## How to Contribute
+## Other links:
 
-TBD.
+* [How to contribute](CONTRIBUTING.md)
+* [Code of Conduct](CODE_OF_CONDUCT.md)
+* [License](LICENSE)
