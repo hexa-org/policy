@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns="http://www.w3.org/2000/svg" viewBox="263 126 541 527" width="541" height="527">
+  <defs>
+    <linearGradient x1="0" x2="1" id="Gradient" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#76bdff"/>
+      <stop offset="1" stop-color="#5070ff"/>
+    </linearGradient>
+    <linearGradient id="Obj_Gradient" xl:href="#Gradient" gradientTransform="translate(533.75 260) rotate(90) scale(57)"/>
+    <linearGradient x1="0" x2="1" id="Gradient_2" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f26077"/>
+      <stop offset="1" stop-color="#ff914d"/>
+    </linearGradient>
+    <linearGradient id="Obj_Gradient_2" xl:href="#Gradient_2" gradientTransform="translate(465.473 502.948) rotate(90) scale(102)"/>
+    <linearGradient id="Obj_Gradient_3" xl:href="#Gradient" gradientTransform="translate(603.5 502.948) rotate(90) scale(102)"/>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -4 10 8" markerWidth="10" markerHeight="8" color="black">
+      <g>
+        <path d="M 8 0 L 0 -3 L 0 3 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+  </defs>
+  <g id="Canvas_1" stroke="none" stroke-dasharray="none" fill="none" stroke-opacity="1" fill-opacity="1">
+    <title>Canvas 1</title>
+    <g id="Canvas_1_Layer_1">
+      <title>Layer 1</title>
+      <g id="Graphic_29">
+        <rect x="264" y="127" width="539" height="525" fill="white"/>
+        <rect x="264" y="127" width="539" height="525" stroke="gray" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(269 132)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="0" y="15">IDQL in OPA</tspan>
+        </text>
+      </g>
+      <g id="Graphic_19">
+        <rect x="299.75" y="468" width="468" height="152.5" fill="white"/>
+        <rect x="299.75" y="468" width="468" height="152.5" stroke="gray" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(304.75 473)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="0" y="15">OPA Policy Bundle</tspan>
+        </text>
+      </g>
+      <g id="Graphic_2">
+        <path d="M 440 260 L 627.5 260 C 630.2614 260 632.5 262.23858 632.5 265 L 632.5 312 C 632.5 314.76142 630.2614 317 627.5 317 L 440 317 C 437.2386 317 435 314.76142 435 312 L 435 265 C 435 262.23858 437.2386 260 440 260 Z" fill="url(#Obj_Gradient)"/>
+        <path d="M 440 260 L 627.5 260 C 630.2614 260 632.5 262.23858 632.5 265 L 632.5 312 C 632.5 314.76142 630.2614 317 627.5 317 L 440 317 C 437.2386 317 435 314.76142 435 312 L 435 265 C 435 262.23858 437.2386 260 440 260 Z" stroke="#506fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(440 279.276)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="67.238" y="15">Service</tspan>
+        </text>
+      </g>
+      <g id="Group_13">
+        <g id="Graphic_3">
+          <path d="M 440 385 L 627.5 385 C 630.2614 385 632.5 387.23858 632.5 390 L 632.5 437 C 632.5 439.7614 630.2614 442 627.5 442 L 440 442 C 437.2386 442 435 439.7614 435 437 L 435 390 C 435 387.23858 437.2386 385 440 385 Z" fill="white"/>
+          <path d="M 440 385 L 627.5 385 C 630.2614 385 632.5 387.23858 632.5 390 L 632.5 437 C 632.5 439.7614 630.2614 442 627.5 442 L 440 442 C 437.2386 442 435 439.7614 435 437 L 435 390 C 435 387.23858 437.2386 385 440 385 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Group_4">
+          <g id="Graphic_11">
+            <path d="M 478.4683 388.75 C 478.4683 388.75 475.70693 398.0485 475.90203 400.80384 C 476.0401 402.7428 479.64334 405.279 479.64334 405.279 C 479.64334 405.279 477.6804 407.60814 476.9225 408.9153 C 476.14064 410.26293 474.95207 413.36193 474.95207 413.36193 C 474.95207 413.36193 469.0422 406.42557 469.52844 403.0219 C 470.1152 398.91893 478.4683 388.75 478.4683 388.75 Z" fill="#bfbfbf"/>
+          </g>
+          <g id="Graphic_10">
+            <path d="M 505.2848 388.75 C 505.2848 388.75 508.0461 398.0485 507.851 400.80384 C 507.71295 402.7428 504.1097 405.279 504.1097 405.279 C 504.1097 405.279 506.07116 407.60814 506.8305 408.9153 C 507.6124 410.26293 508.801 413.36193 508.801 413.36193 C 508.801 413.36193 514.71085 406.42557 514.2246 403.0219 C 513.6378 398.91893 505.2848 388.75 505.2848 388.75 Z" fill="#bfbfbf"/>
+          </g>
+          <g id="Graphic_9">
+            <path d="M 491.9688 399.6408 C 484.141 399.6408 477.2332 405.18597 474.94456 413.3064 L 491.9688 418.95364 Z" fill="#7d9199"/>
+          </g>
+          <g id="Graphic_8">
+            <path d="M 491.9538 399.61077 C 499.7801 399.61077 506.68946 405.15746 508.97657 413.2779 L 491.9538 418.92363 L 491.9538 399.61077 Z" fill="#566366"/>
+          </g>
+          <g id="Graphic_7">
+            <path d="M 491.9238 413.2974 L 474.91155 413.2974 L 474.91155 425.18767 C 474.91155 425.18767 481.7804 427.88147 484.61675 430.05753 C 486.9714 431.8644 491.5021 438.25 491.5021 438.25 L 491.9238 438.247 L 491.9238 413.2974 Z" fill="#7d9199"/>
+          </g>
+          <g id="Graphic_6">
+            <path d="M 491.9328 413.1323 L 508.94655 413.1323 L 508.94655 425.0226 C 508.94655 425.0226 502.0762 427.7164 499.24135 429.89245 C 496.8222 431.75035 492.3365 438.247 492.3365 438.247 L 491.9238 438.247 L 491.9328 413.1323 Z" fill="#566366"/>
+          </g>
+          <g id="Graphic_5">
+            <circle cx="491.9373" cy="412.72713" r="2.14154281434943" fill="white"/>
+          </g>
+        </g>
+        <g id="Graphic_12">
+          <text transform="translate(519.25305 397.636)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="26" fill="black" x="19.984" y="25">OPA</tspan>
+          </text>
+        </g>
+      </g>
+      <g id="Group_25">
+        <g id="Graphic_14">
+          <path d="M 411.223 502.948 L 519.723 502.948 L 519.723 584.548 C 487.173 574.348 443.773 615.148 411.223 594.748 Z" fill="url(#Obj_Gradient_2)"/>
+          <path d="M 411.223 502.948 L 519.723 502.948 L 519.723 584.548 C 487.173 574.348 443.773 615.148 411.223 594.748 Z" stroke="#506fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(416.223 530.4)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="27.626" y="15">Hexa-</tspan>
+            <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="12.794" y="33.448">IDQL.rego</tspan>
+          </text>
+        </g>
+        <g id="Graphic_16">
+          <path d="M 549.25 502.948 L 657.75 502.948 L 657.75 584.548 C 625.2 574.348 581.8 615.148 549.25 594.748 Z" fill="url(#Obj_Gradient_3)"/>
+          <path d="M 549.25 502.948 L 657.75 502.948 L 657.75 584.548 C 625.2 574.348 581.8 615.148 549.25 594.748 Z" stroke="#506fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(554.25 531.428)" fill="black">
+            <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="13.978" y="15">IDQL.json</tspan>
+            <tspan font-family="Helvetica Neue" font-size="14" fill="black" x="3.876" y="31.447998">(IDQL policies)</tspan>
+          </text>
+        </g>
+      </g>
+      <g id="Graphic_17">
+        <text transform="translate(343.5 535.5)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="7.992" y="15">OPA</tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="2.224" y="33.448">Policy </tspan>
+        </text>
+      </g>
+      <g id="Graphic_18">
+        <text transform="translate(677.777 535.5)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="10.816" y="15">Data</tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="2.224" y="33.448">(JSON) </tspan>
+        </text>
+      </g>
+      <g id="Line_20">
+        <line x1="533.75" y1="166" x2="533.75" y2="250.1" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_21">
+        <line x1="500.83333" y1="317" x2="500.97574" y2="375.10003" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_22">
+        <line x1="566.6667" y1="385" x2="566.6667" y2="326.9" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_23">
+        <path d="M 533.75 442 L 533.75 473.5748 L 465.473 473.5748 L 465.473 502.948" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_24">
+        <path d="M 533.75 442 L 533.75 473.5748 L 603.5 473.5748 L 603.5 502.948" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_26">
+        <text transform="translate(367 195)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="0" y="15">Request, Event, etc.</tspan>
+        </text>
+      </g>
+      <g id="Graphic_27">
+        <text transform="translate(292.284 324.776)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="47.12" y="15">Query</tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="2.224" y="33.448">(including Request </tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="14.824" y="51.895996">Context JSON)</tspan>
+        </text>
+      </g>
+      <g id="Graphic_28">
+        <text transform="translate(643.993 334)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="30.528" y="15">Decision</tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="0" y="33.448">(any JSON value)</tspan>
+        </text>
+      </g>
+    </g>
+  </g>
+</svg>
