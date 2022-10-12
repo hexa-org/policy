@@ -508,8 +508,6 @@ idql-policies:
     actionUri: https:POST:/Users/
   - name: editProfile
     actionUri: ietf:https:PUT|PATCH:/Users/*
-    condition:
-      rule: adminType eq admincontractor
   object:
     . . .
 ```
