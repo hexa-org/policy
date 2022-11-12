@@ -2,16 +2,25 @@
 
 ## Introduction
 
-Authorization Policy is a general approach in computer science and security systems that suggests a language that
-can be used specify enforcement rules that requests from actors (`Subjects`) must be in compliance with for a
-transaction to proceed or in some cases for results to return. Policy language breaks down into two major forms: **policy tuples**
-and **declarative policy** language.
+An **Authorization Policy** is a rule or set of rules systems security that permits or denies permissions to an actor. 
+To express policy there are any formats and languages that have been used over time. In addition to permitting or denying
+permissions or actions, some policies allow scoping which affects what results may be returned from any permitted action. 
+Some key policy languages and formats that are in use today include:
 
-A policy tuple is simply an array of parameter values used by a policy decision engine to interpret allow or deny rules
-for a transactions. Examples of tuples are: Attribute Based Access Control (ABAC) and Role-Based Access Control (RBAC). 
+* RBAC - Role Based Access Control
+* ABAC - Attribute Based Access Control
+* Zanzibar - A new relationship based access control langauge published by Google
+* Proprietary platform policies such as on Amazon AWS, Google GCP, and Microsoft Azure
+* Rego - Policy language for Opan Policy Agent
+* XACML - XML Access Markup Language
+* ACL - Access Control List
 
-A declarative policy language is a non-procedural language which describes a series of tests to be performed but as
-with a declarative programming language does not directly describe how to do it. An example of a declarative policy language
+Policies break down into two major forms: **tuples**
+and **declarative** languages.
+* _Policy Tuple_ (aka Access Control List) - An array of parameters (e.g. subject, permission, resource) used by a policy decision 
+engine to allow or deny an operation. Examples of tuples are: Attribute Based Access Control (ABAC) and Role-Based Access Control (RBAC). 
+* _Declarative Policy Language_ - A non-procedural language which describes a series of tests to be performed but as
+with a declarative programming language (e.g. Go, Java) does not directly describe how to do it. An example of a declarative _policy_ language
 is [Open Policy Agent's Rego](https://www.openpolicyagent.org/docs/latest/policy-language/).
 
 ### Terminology:
@@ -28,7 +37,7 @@ down into the following Policy components:
 
 ![IDQL Policy](../collateral/images/IDQL-rule.png)
 
-IDQL is a five-part policy language in "tuple" form intended to act as a neutral representation for most existing policy languages
+IDQL is a five-part policy language in _Policy Tuple_ form intended to act as a neutral representation for most existing policy languages
 from RBAC and ABAC to Zanzibar and compatible with Rego. The five parts of IDQL represent:
 
 * `Subjects` - What actors are to be matched to a policy. This includes notions of something you are or have such as
@@ -41,6 +50,12 @@ from RBAC and ABAC to Zanzibar and compatible with Rego. The five parts of IDQL 
   or request matching conditions (e.g. the IP address mask for the HTTP client).
 * Scope - Represents further restrictions on the scope of access. A scope could be a restriction to a subset of rows or
   columns in a table, or to a specific document or set of documents.
+
+IDQL's 5-part tuple form is intended to provide the capability to unify all policy languages into a single common form.
+By unifying the prepresentation, IDQL enables the following to happen:
+* Centralize/review/audit policies from multiple system types in a common format
+* Migrate services from one system to another while maintaining a common permission rules
+* Support separation of duties keeping policy management separate from Identity Management (e.g. user attributes) and Infrastructure Management.
 
 The following sections describe how different policy models map to IDQL.
 
@@ -197,14 +212,26 @@ relation {
 relation: "viewer" }}}
 }}}
 ```
-_**To be completed**_
+_**Zanzibar to be completed**_
 
 ## Open Policy Agent Rego
-[Rego is a declarative policy language](https://www.openpolicyagent.org/docs/latest/policy-language/) used by [OpenPolicyAgent](https://www.openpolicyagent.org).
-In the [Hexa Project](https://www.cncf.io/projects/hexa/), IDQL is supported directly in Rego through the use of an Hexa-IDQL Rego script that parses standard
-IDQL tuples inside an OPA decision processor. Rather than transform IDQL into Rego, OPA simply interprets IDQL Policy using Rego. To "run" IDQL, an
-OPA "bundle" is created that includes the Hexa Rego code and IDQL Policy as "data". A normal OPA client provides standardized contextual input
-information so that IDQL Subjects, Actions, and Objects may be validated inside OPA.
+[Rego is a declarative policy language](https://www.openpolicyagent.org/docs/latest/policy-language/) used by 
+[OpenPolicyAgent](https://www.openpolicyagent.org). OPA's primary benefit is that policy decisions can be deployed as cloud-native
+microservices offering custom and general purpose decision services with testing, and auditing capabilities.  OPA can be
+used in many different ways such as:
+* As a Kubernetes admission controller controlling applications deployable in an operational cluster;
+* As a configuration controller; and,
+* Enforcing policies in API gateways or responding to queries directly from applications (e.g. what buttons can be enabled for the current user).
+ 
+In the [Hexa Project](https://www.cncf.io/projects/hexa/), IDQL is supported directly in Rego through the use of a 
+Hexa-IDQL Rego script that parses standard IDQL tuples inside an OPA decision processor. Rather than transform IDQL into 
+Rego language, OPA simply interprets IDQL Policy using Rego. In rego terms, IDQL policy becomes "data" to the OPA policy engine.
+Doing this makes it easier to deploy policy across many different OPA and non-OPA environments. It also enables separation of
+duties where policy configuration is kept separate from policy decision logic programs. For example when roles or users change
+within a policy, policy data is changed rather than versioning rego with every change in the identity information system.
+
+To deploy IDQL on OPA, a "bundle" is created that includes the Hexa Rego code and IDQL Policy as "data". A normal OPA 
+client provides standardized contextual input information so that IDQL Subjects, Actions, and Objects may be validated inside OPA.
 <p align="center"><img src="../collateral/images/IDQL-Opa.svg" alt="IDQL on OPA" width=50%/></p>
 In the diagram above, fixed Hexa-IDQL.rego code is bundled with IDQL policy tuples in the form of a Data json file. When a client
 makes a request to a service, the service calls an OPA Agent to make a policy decision query. The query includes information about
