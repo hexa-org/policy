@@ -17,7 +17,7 @@ All IDQL specifications follow a common set of conventions and formats. For more
 [IDQL Conventions](Conventions.md).
 
 Specifications:
-* [Core IDQL specification](IDQL-core-specification.md)
+* [Core IDQL specification](../IDQL-core-specification.md)
 * Sources and Assets
   * [Identity Provider specification](IDQL-providers.md)
   * [Objects Specifications](IDQL-assets.md)

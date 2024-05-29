@@ -7,7 +7,7 @@ This is the repository for the development of IDQL Policy Language.
 IDQL's objective is to standardize access policy and associated APIs across the cloud and the stack usable in 
 standalone deployments all the way to hybrid multi-cloud scenarios.
 
-Quick link to [IDQL specifications](specs/Specifications.md).
+Quick link to [IDQL specifications](Hexa-IDQL-specification.md).
 
 ## Why Is IDQL Needed?
 IDQL's goal is intended to address the following issues:
@@ -32,6 +32,7 @@ IDQL is intended to enable management of the following policy scenarios where po
 * Internal access between micro-services;
 * Scoping of information available to an application; and,
 * Inform applications what rights a subject has in order to optimize the user interface experience.
+
 ## How does IDQL compare to other standards?
 * CNCF [Open Policy Agent](https://www.openpolicyagent.org) (OPA) – Focused on K8S cluster management, networking, and 
   microservices. It is expected that IDQL will be supported in OPA by using a set of (tentatively
@@ -49,9 +50,13 @@ the correct cloud providers, layers and components. A basic statement consists o
 
 ![](./collateral/images/IDQL-statement.png "IDQL Statement")
 
-IDQL policy is defined in either JSON or YAML human-readable files. IDQL is intended to support both lowest common 
-denominator User App Policies (? source) and extended features such as contextual access. IDQL policy is then 
-translated into proprietary policy and published into existing IAM systems through APIs and gateways. 
+The [IDQL policy specification](Hexa-IDQL-specification.md) defines a neutral JSON policy rule format. IDQL is a platform-neutral format that 
+can be used to collect, analyze, audit, and provision policies.  The format has been tested against 3 broad categories
+of policy systems including:
+
+* Classic RBAC systems that use role based groupings to manage access (uses virtualized policy mapping)
+* Declarative Policy Language systems that are mapped into IDQL. Examples include Google Bind, and Amazon Cedar.
+* IDQL Native Policy decision systems such as implemented with the [Open Policy Agent](https://www.openpolicyagent.org) and the [Hexa OPA Project](https://github.com/hexa-org/policy-opa).
 
 ## The Standard Process
 

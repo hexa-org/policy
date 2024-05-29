@@ -1,0 +1,103 @@
+{
+  "policies": [
+    {
+      "meta": {
+        "policyId": "GetUsers",
+        "version": "0.6",
+        "description": "Get information (e.g. email, picture) associated with a user"
+      },
+      "subject": {
+        "members": ["anyAuthenticated"]
+      },
+      "actions": [
+        {
+          "actionUri": "can_read_user"
+        }
+      ],
+      "object": {
+        "resource_id": "todo"
+      }
+    },
+    {
+      "meta": {
+        "policyId": "GetTodos",
+        "version": "0.6",
+
+        "description": "Get the list of todos. Always returns true for every user??"
+      },
+      "subject": {
+        "members": ["anyAuthenticated"]
+      },
+      "actions": [
+        {
+          "actionUri": "can_read_todos"
+        }
+      ],
+      "object": {
+        "resource_id": "todo"
+      }
+    },
+    {
+      "meta": {
+        "version": "0.6",
+        "description": "Create a new Todo",
+        "policyId": "PostTodo"
+      },
+      "subject": {
+        "members": ["role:admin","role:editor"]
+      },
+      "actions": [
+        {
+          "actionUri": "can_create_todo"
+        }
+      ],
+      "object": {
+        "resource_id": "todo"
+      }
+    },
+    {
+      "meta": {
+        "version": "0.6",
+        "description": "Edit(complete) a todo.",
+        "policyId": "PutTodo"
+      },
+      "subject": {
+        "members": ["anyAuthenticated"]
+      },
+      "actions": [
+        {
+          "actionUri": "can_update_todo"
+        }
+      ],
+      "condition": {
+        "rule": "subject.roles co evil_genius or ( subject.roles co editor and resource.ownerID eq subject.claims.id )",
+        "action": "allow"
+      },
+      "object": {
+        "resource_id": "todo"
+      }
+    },
+    {
+      "meta": {
+        "version": "0.6",
+        "description": "Delete a todo if admin or owner of todo",
+        "policyId": "DeleteTodo"
+      },
+      "subject": {
+        "members": ["anyAuthenticated"]
+      },
+      "actions": [
+        {
+          "actionUri": "can_delete_todo"
+        }
+      ],
+      "condition": {
+        "rule": "subject.roles co admin or ( subject.roles co editor and resource.ownerID eq subject.claims.id )",
+        "action": "allow"
+      },
+      "object": {
+        "resource_id": "todo"
+      }
+    }
+  ]
+}
