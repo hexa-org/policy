@@ -2,6 +2,8 @@
 
 Draft: 20-May-2024
 
+Revised: 5-Nov-2024
+
 This specification defines the IDQL policy language. IDQL is designed to be a general purpose, platform-neutral
 policy language for use in hybrid and multi-cloud environments. IDQL is intended support:
 
