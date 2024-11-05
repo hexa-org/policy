@@ -3,101 +3,81 @@
     {
       "meta": {
         "policyId": "GetUsers",
-        "version": "0.6",
+        "version": "0.7",
         "description": "Get information (e.g. email, picture) associated with a user"
       },
-      "subject": {
-        "members": ["anyAuthenticated"]
-      },
-      "actions": [
-        {
-          "actionUri": "can_read_user"
-        }
+      "subjects": [
+        "anyAuthenticated"
       ],
-      "object": {
-        "resource_id": "todo"
-      }
+      "actions": [
+        "can_read_user"
+      ],
+      "object": "todo"
     },
     {
       "meta": {
         "policyId": "GetTodos",
-        "version": "0.6",
-
+        "version": "0.7",
         "description": "Get the list of todos. Always returns true for every user??"
       },
-      "subject": {
-        "members": ["anyAuthenticated"]
-      },
-      "actions": [
-        {
-          "actionUri": "can_read_todos"
-        }
+      "subjects": [
+        "anyAuthenticated"
       ],
-      "object": {
-        "resource_id": "todo"
-      }
+      "actions": [
+        "can_read_todos"
+      ],
+      "object": "todo"
     },
     {
       "meta": {
-        "version": "0.6",
+        "version": "0.7",
         "description": "Create a new Todo",
         "policyId": "PostTodo"
       },
-      "subject": {
-        "members": ["role:admin","role:editor"]
-      },
-      "actions": [
-        {
-          "actionUri": "can_create_todo"
-        }
+      "subjects": [
+        "role:admin",
+        "role:editor"
       ],
-      "object": {
-        "resource_id": "todo"
-      }
+      "actions": [
+        "can_create_todo"
+      ],
+      "object": "todo"
     },
     {
       "meta": {
-        "version": "0.6",
-        "description": "Edit(complete) a todo.",
+        "version": "0.7",
+        "description": "Un(complete) a todo.",
         "policyId": "PutTodo"
       },
-      "subject": {
-        "members": ["anyAuthenticated"]
-      },
+      "subjects": [
+        "anyAuthenticated"
+      ],
       "actions": [
-        {
-          "actionUri": "can_update_todo"
-        }
+        "can_update_todo"
       ],
       "condition": {
-        "rule": "subject.roles co evil_genius or ( subject.roles co editor and resource.ownerID eq subject.claims.id )",
+        "rule": "subject.roles co evil_genius or (subject.roles co editor and resource.properties.ownerID eq subject.claims.email)",
         "action": "allow"
       },
-      "object": {
-        "resource_id": "todo"
-      }
+      "object": "todo"
     },
     {
       "meta": {
-        "version": "0.6",
+        "version": "0.7",
         "description": "Delete a todo if admin or owner of todo",
         "policyId": "DeleteTodo"
       },
-      "subject": {
-        "members": ["anyAuthenticated"]
-      },
+      "subjects": [
+        "anyAuthenticated"
+      ],
       "actions": [
-        {
-          "actionUri": "can_delete_todo"
-        }
+        "can_delete_todo"
       ],
       "condition": {
-        "rule": "subject.roles co admin or ( subject.roles co editor and resource.ownerID eq subject.claims.id )",
+        "rule": "subject.roles co admin or (subject.roles co editor and resource.properties.ownerID eq subject.claims.email)",
         "action": "allow"
       },
-      "object": {
-        "resource_id": "todo"
-      }
+      "object": "todo"
     }
   ]
 }

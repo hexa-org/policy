@@ -2,6 +2,9 @@
 
 This is the repository for the development of IDQL Policy Language. 
 
+> [!Note]
+> Policy-Mapper release 0.7.1 included significant simplificaitons to IDQL policy which is now documented [here](Hexa-IDQL-specification.md). 
+
 ## Introduction
 
 IDQL's objective is to standardize access policy and associated APIs across the cloud and the stack usable in 

@@ -7,19 +7,13 @@
         "description": "Retrieve the root page open to anyone"
       },
       "actions": [
-        {
-          "actionUri": "http:GET:/"
-        }
+        "http:GET:/"
       ],
-      "subject": {
-        "members": [
-          "any",
-          "anyauthenticated"
-        ]
-      },
-      "object": {
-        "resource_id": "hexaIndustries"
-      }
+      "subjects": [
+        "any",
+        "anyauthenticated"
+      ],
+      "object": "hexaIndustries"
     },
     {
       "meta": {
@@ -27,20 +21,14 @@
         "policyId": "getSales"
       },
       "actions": [
-        {
-          "actionUri": "sales"
-        }
+        "sales"
       ],
-      "subject": {
-        "members": [
-          "anyauthenticated",
-          "sales@hexaindustries.io",
-          "marketing@hexaindustries.io"
-        ]
-      },
-      "object": {
-        "resource_id": "hexaIndustries"
-      }
+      "subjects": [
+        "anyauthenticated",
+        "sales@hexaindustries.io",
+        "marketing@hexaindustries.io"
+      ],
+      "object": "hexaIndustries"
     },
     {
       "meta": {
@@ -48,21 +36,13 @@
         "policyId": "getAccounting"
       },
       "actions": [
-        {
-          "actionUri": "http:GET:/accounting"
-        },
-        {
-          "actionUri": "http:POST:/accounting"
-        }
+        "http:GET:/accounting",
+        "http:POST:/accounting"
       ],
-      "subject": {
-        "members": [
-          "accounting@hexaindustries.io"
-        ]
-      },
-      "object": {
-        "resource_id": "hexaIndustries"
-      }
+      "subjects": [
+        "accounting@hexaindustries.io"
+      ],
+      "object": "hexaIndustries"
     },
     {
       "meta": {
@@ -70,18 +50,12 @@
         "policyId": "getHumanResources"
       },
       "actions": [
-        {
-          "actionUri": "http:GET:/humanresources"
-        }
+        "http:GET:/humanresources"
       ],
-      "subject": {
-        "members": [
-          "humanresources@hexaindustries.io"
-        ]
-      },
-      "object": {
-        "resource_id": "hexaIndustries"
-      }
+      "subjects": [
+        "humanresources@hexaindustries.io"
+      ],
+      "object": "hexaIndustries"
     }
   ]
 }

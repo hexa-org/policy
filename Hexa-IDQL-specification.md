@@ -30,7 +30,6 @@ Table of Contents
     * [3.2 Subject Clause](#32-subject-clause)
     * [3.3 Action Clause](#33-actions-clause)
         * [3.3.1 HTTP Request URIs](#331-http-requests)
-        * [3.3.2 Amazon ARN Actions](#332-amazon-arn-actions)
         * [3.3.3 Azure ARN Actions](#333-microsoft-azure-urns-for-actions)
         * [3.3.4 Google URN Actions](#334-google-urns-for-actions)
         * [3.3.5 AuthZen and Policy-OPA Integrations Actions](#335-authzen-and-hexa-policy-opa)
@@ -89,22 +88,14 @@ The JSON representation of the YAML policy above:
         "date": "2021-08-01 21:32:44 UTC",
         "description": "Access enabling user self service for users with role canarySelfService"
       },
-      "subject": {
-        "members": [
-          "role:canarySelfService"
-        ]
-      },
-      "actions": [
-        {
-          "actionUri": "createProfile"
-        },
-        {
-          "actionUri": "editProfile"
-        }
+      "subjects": [
+                  "role:canarySelfService"
       ],
-      "object": {
-        "resource_id": "CanaryProfileService"
-      },
+      "actions": [
+        "createProfile",
+        "editProfile"
+      ],
+      "object": "CanaryProfileService",
       "condition": {
         "rule": "subject.type eq bearer",
         "action": "allow"
@@ -117,19 +108,13 @@ The JSON representation of the YAML policy above:
         "date": "2021-08-01 21:32:44 UTC",
         "description": "Access enabling contract employees to invoke editProfile"
       },
-      "subject": {
-        "members": [
+      "subjects": [
           "anyAuthenticated"
-        ]
-      },
-      "actions": [
-        {
-          "actionUri": "editProfile"
-        }
       ],
-      "object": {
-        "resource_id": "CanaryProfileService"
-      },
+      "actions": [
+        "editProfile"
+      ],
+      "object": "CanaryProfileService",
       "condition": {
         "rule": "User:employeeType eq contract",
         "action": "allow"
@@ -142,22 +127,14 @@ The JSON representation of the YAML policy above:
         "description": "Internal services (subnet 192.168.1.0/24) can create and update profiles",
         "policyId": "ServiceWorkflow"
       },
-      "subject": {
-        "members": [
+      "subjects": [
           "net:192.168.1.0/24"
-        ]
-      },
-      "actions": [
-        {
-          "actionUri": "createProfile"
-        },
-        {
-          "actionUri": "editProfile"
-        }
       ],
-      "object": {
-        "resource_id": "CanaryProfileService"
-      },
+      "actions": [
+        "createProfile",
+        "editProfile"
+      ],
+      "object": "CanaryProfileService",
       "condition": {
         "rule": "subject.type eq jwt and subject.sub eq WorkFlowSvcAcnt",
         "action": "allow"
@@ -261,7 +238,8 @@ Attributes used for versioning of policy statements include:
 
 ### 3.2 Subject Clause
 
-The `subject` defines either the type of subjects or a list of subjects that a policy applies to. If `subject` is not
+The `subjects` is an array of subjects that a policy applies to. When multiple values are supplied, any single match is
+considered a match for the policy (an or clause). If `subjects` is not
 present,
 the policy rule is applied to all requests, regardless of authentication type and SHALL be treated as equivalent to a
 subject type (`type`) of `any`.
@@ -269,17 +247,15 @@ The following example, allows users identified by specific values:
 
 ```json
 {
-  "subject": {
-    "members": [
+  "subjects": [
       "user:gerry@strata.io",
       "user:independentidentity@gmail.com",
       "domain:example.com"
-    ]
-  }
+  ]
 }
 ```
 
-A `subject` is a JSON object containing the sub-attribute `members` which is an array of strings representing service
+`subjects` is a JSON array containing one or more strings representing service
 user, group, role, domain, or network that may be matched. Member values may be dependent on the target platform
 definition but often is a JWT Subject or a username or account name. If group is specified, the group must be part of
 the
@@ -294,6 +270,8 @@ Each value of the `members` array has the form `<type>[:<value>]` where type is 
 
 * `any` - any user including anonymous requests
 * `anyAuthenticated` - any user excluding anonymous requests
+
+The following values are common in some systems and may depend on the [Policy Information Model](https://github.com/hexa-org/policy-mapper/blob/pim-0.7.1/docs/PolicyInfoModels.md) for the PDP and application.
 * `user` - a specific user value (could be email, username, etc. depending on target platform)
 * `group` - a subject that is a member of a particular group
 * `domain` - a subject that is a member of a particular domain
@@ -307,7 +285,7 @@ Each value of the `members` array has the form `<type>[:<value>]` where type is 
 
 ### 3.3 Actions Clause
 
-Actions describe the entitlement, action, or request that may be performed at a particular service Object. If no
+Actions describe the entitlement, action, or request that may be performed at the policy `Object`. If no
 actions are specified, it SHALL be assumed that the rule permits all actions. Actions can be logical (such as a
 permission or role granted) or a
 request type that compares protocol, method, and path.
@@ -315,21 +293,12 @@ request type that compares protocol, method, and path.
 ```json
 {
   "actions": [
-    {
-      "actionUri": "ietf:http:POST:/testpath*"
-    },
-    {
-      "actionUri": "ietf:http:!PUT:/testpath*"
-    },
-    {
-      "actionUri": "updateProfile"
-    }
+    "http:POST:/testpath*",
+    "http:!PUT:/testpath*",
+    "updateProfile"
   ]
 }
 ```
-
-An `actionUri`'s format largely depends on the platform that originated the values. The following sections list some
-of the examples from various sources:
 
 #### 3.3.1 HTTP Requests
 
@@ -348,25 +317,17 @@ Where:
 * `<query>` - The request query component (per
   RFC3986 [Section 3.4](https://www.rfc-editor.org/rfc/rfc3986#section-3.4)).
 
-#### 3.3.2 Amazon ARN Actions
+#### 3.3.2 Logical Actions
 
-The `<domain-arn>` IDQL prefix for Amazon is `arn:` which designates an Amazon Resource Name and follows AWS's [ARN
-format](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html).
-Typically, AWS uses ARNs to refer to resources, sessions, or identities. In the context of an IDQL Action, an [AWS
-Action](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_action.html) MAY be used combined
-with the `arn:` prefix. So for example, the action `ec2:StartInstances` becomes
-`arn:ec2:StartInstances`. In most cases, AWS actions will be formatted:
-> `arn:<product>:<action>`
+Actions can also be a logical or Policy Information Model Defined Action such as:
 
-Example actions:
+`"PhotoApp:Action:\"viewPhoto\""`
 
-| Type | Example                  |
-|------|--------------------------|
-| EC2  | `arn:ec2:StartInstances` |
-| IAM  | `arn:iam:ChangePassword` |
-| S3   | `arn:s3:GetObject`       |
+In this case: the format is:
+`"<AppId>:Action:\"<actionName>\"""`
 
-In an Amazon ARN, wildcards (`*`) MAY be used. For example: `arn:s3:*` allows any action on an S3 object.
+Note that the last element is the logical action name.
+
 
 #### 3.3.3 Microsoft Azure URNs for Actions
 
@@ -449,19 +410,12 @@ the current HexaPolicy engine performs a simple string equality match.
 
 ### 3.4 Object Clause
 
-Objects are assets in a project protected by policy. A policy `object` has a single attribute `resource_id` that
-identifies
-the resource that the policy is applied to. A missing values shall mean that the policy applies to all target objects.
-
-> [!Note]
-> The policy element is currently an object to reserve space for future qualifiers that might be needed for objects.
-> Currently only `resourc_id` is supported.
+Objects are assets in a project protected by policy. A policy `object` is a string value that
+identifies the resource that the policy is applied to. A missing values shall mean that the policy applies to all target objects.
 
 ```json
 {
-  "object": {
-    "resource_id": "CanaryProfileService"
-  }
+  "object": "CanaryProfileService"
 }
 ```
 
